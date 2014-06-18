@@ -17,7 +17,7 @@ class DeviceManager {
 	 * @return Device Dispositivo criado
 	 */
 	public static function insertDevice($device) {
-		if (exists($device->getRegistrationId(), $device->getUserId())) {
+		if (DeviceManager::exists($device->getRegistrationId(), $device->getUserId())) {
 			return $device;
 		}
 
@@ -37,7 +37,7 @@ class DeviceManager {
 	 */
 	public static function updateDeviceRegistrationId($device, $newRegistrationId) {
 		// verifica se o dispositivo existe com o registrationId antigo e atualiza se existir
-		if (exists($device->getRegistrationId(), $device->getUserId())) {
+		if (DeviceManager::exists($device->getRegistrationId(), $device->getUserId())) {
 			// TODO atualizar
 			return $device;
 		}

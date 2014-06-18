@@ -24,34 +24,18 @@ date_default_timezone_set("UTC");
 
 // inicializa e configura as rotas
 $app = new \Slim\Slim();
+$app->post('/devices', 'createDevice');
+$app->put('/devices', 'updateDevice');
+$app->delete('/devices', "deleteDevice");
+$app->post('/notifications', "sendNotification");
+$app->run();
 
 /**
- * Retorna um dispositivo informado no request
- *
- * @param \Slim\Http\Request $request
- * @return \Unisuam\Model\Device dispositivo
+ * Criação de dispositivo
  */
-function getDeviceFromRequest($request) {
-	$input = json_decode($request->getBody());
-	return getDeviceFromJson($input);
-}
-
-/**
- * Retorna um dispositivo informado via json
- *
- * @param object $input
- *        	Json
- * @return Device dispositivo
- */
-function getDeviceFromJson($input) {
-	return new Device((string) $input->registration_id, (int) $input->type);
-}
-
-/**
- * Criação e atualização de dispositivos
- */
-$app->post('/devices', function () use($app) {
+function createDevice() {
 	$device = null;
+	$app = Slim::getInstance();
 
 	try {
 		$device = getDeviceFromRequest($app->request());
@@ -69,11 +53,15 @@ $app->post('/devices', function () use($app) {
 		$app->response()->status(500);
 		$app->response()->header('X-Status-Reason', $e->getMessage());
 	}
-});
+}
 
-$app->put('devices', function () use($app) {
+/**
+ * Atualização de dispositivo
+ */
+function updateDevice() {
 	$newRegistrationId = null;
 	$device = null;
+	$app = Slim::getInstance();
 
 	try {
 		// obtém os dados informados
@@ -96,10 +84,14 @@ $app->put('devices', function () use($app) {
 		$app->response()->status(500);
 		$app->response()->header('X-Status-Reason', $e->getMessage());
 	}
-});
+}
 
-$app->delete('/devices', function () use($app) {
+/**
+ * Remoção de dispositivo
+ */
+function deleteDevice() {
 	$device = null;
+	$app = Slim::getInstance();
 
 	try {
 		$device = getDeviceFromRequest($app->request());
@@ -114,13 +106,14 @@ $app->delete('/devices', function () use($app) {
 		$app->response()->status(500);
 		$app->response()->header('X-Status-Reason', $e->getMessage());
 	}
-});
+}
 
 /**
- * Envio de notificação
+ * Envia uma notificação
  */
-$app->post('/notifications', function () use($app) {
+function sendNotification() {
 	$notification = null;
+	$app = Slim::getInstance();
 
 	try {
 		// leitura da notificação informado no post
@@ -149,7 +142,28 @@ $app->post('/notifications', function () use($app) {
 		$app->response()->status(500);
 		$app->response()->header('X-Status-Reason', $e->getMessage());
 	}
-});
+}
 
-$app->run();
+
+/**
+ * Retorna um dispositivo informado no request
+ *
+ * @param \Slim\Http\Request $request
+ * @return \Unisuam\Model\Device dispositivo
+ */
+function getDeviceFromRequest($request) {
+	$input = json_decode($request->getBody());
+	return getDeviceFromJson($input);
+}
+
+/**
+ * Retorna um dispositivo informado via json
+ *
+ * @param object $input
+ *        	Json
+ * @return Device dispositivo
+ */
+function getDeviceFromJson($input) {
+	return new Device((string) $input->registration_id, (int) $input->type, (string) $input->user_id);
+}
 ?>
