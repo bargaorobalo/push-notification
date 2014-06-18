@@ -1,5 +1,24 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <buildpath>
-	<buildpathentry kind="src" path=""/>
+	<buildpathentry kind="src" path="Push/Ios"/>
+	<buildpathentry kind="src" path="vendor/slim/slim"/>
+	<buildpathentry kind="src" path="vendor/zendframework/zend-validator"/>
+	<buildpathentry kind="src" path="vendor/zendframework/zendservice-google-gcm/library"/>
+	<buildpathentry kind="src" path="Model"/>
+	<buildpathentry kind="src" path="vendor/composer"/>
+	<buildpathentry kind="src" path="vendor/symfony/console"/>
+	<buildpathentry kind="src" path="vendor/zendframework/zendservice-apple-apns/library"/>
 	<buildpathentry kind="con" path="org.eclipse.php.core.LANGUAGE"/>
+	<buildpathentry kind="src" path="Push/Android"/>
+	<buildpathentry kind="src" path="vendor/zendframework/zend-http"/>
+	<buildpathentry kind="src" path="vendor/zendframework/zend-loader"/>
+	<buildpathentry kind="src" path="vendor/sly/notification-pusher/src"/>
+	<buildpathentry kind="src" path="vendor/symfony/options-resolver"/>
+	<buildpathentry kind="src" path="vendor/zendframework/zend-uri"/>
+	<buildpathentry kind="src" path="vendor/doctrine/inflector/lib"/>
+	<buildpathentry kind="src" path="vendor/zendframework/zend-stdlib"/>
+	<buildpathentry kind="src" path="vendor/zendframework/zend-json"/>
+	<buildpathentry excluding="Android/|Ios/" kind="src" path="Push"/>
+	<buildpathentry kind="src" path="vendor/symfony/process"/>
+	<buildpathentry kind="src" path="vendor/zendframework/zend-escaper"/>
 </buildpath>

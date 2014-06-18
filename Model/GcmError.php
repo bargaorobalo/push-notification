@@ -1,4 +1,5 @@
 <?php
+
 namespace Unisuam\Model;
 
 /**
@@ -6,8 +7,7 @@ namespace Unisuam\Model;
  *
  * Gerencia o envio de mensagens via push
  */
-class GcmError
-{
+class GcmError {
 	/**
 	 * Notificação não continha um registration id.
 	 */

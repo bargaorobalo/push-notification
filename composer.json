@@ -1,6 +1,7 @@
 {
-    "require": {
-        "sly/notification-pusher": "2.*",
-        "slim/slim": "2.*"
-    }
+	"require" : {
+		"sly/notification-pusher" : "2.*",
+		"slim/slim" : "2.*"
+	},
+	"name" : "Push-Notifications"
 }

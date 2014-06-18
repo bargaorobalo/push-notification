@@ -1,0 +1,4 @@
+com.dubture.composer.corecomposer_phar=
+com.dubture.composer.corephp_executable=/usr/bin/php
+com.dubture.composer.coreuse_project_phar=false
+eclipse.preferences.version=1
