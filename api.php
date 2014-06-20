@@ -71,6 +71,7 @@ function updateDevice() {
 		// obtém os dados informados
 		$request = $app->request();
 		$input = json_decode($request->getBody());
+
 		$device = getDeviceFromJson($input->device);
 		$newToken = $input->new_token;
 	} catch (Exception $e) {
@@ -162,14 +163,16 @@ function getDeviceFromRequest($request) {
 }
 
 /**
- * Retorna um dispositivo informado via json
+ * Retorna um dispositivo informado via json, validando-o
  *
  * @param object $input
  *        	Json
  * @return Device dispositivo
  */
 function getDeviceFromJson($input) {
-	return new Device((string) $input->token, (int) $input->type, (string) $input->user_id);
+	$device = new Device((string) $input->token, (int) $input->type, (string) $input->user_id);
+	DeviceManager::validateDevice($device);
+	return $device;
 }
 
 /**

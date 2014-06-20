@@ -83,27 +83,9 @@ class Device implements \JsonSerializable {
 	 *        	Identificador do usuário
 	 */
 	public function __construct($token, $type, $userId) {
-		if (!$token) {
-			throw new \InvalidArgumentException("O identificador do dispositivo é obrigatório.");
-		}
-
-		if (!$type) {
-			throw new \InvalidArgumentException("O tipo do dispositivo é obrigatório.");
-		}
-
-		// verifica se o usuário foi informado e se é um CPF
-		if (!$userId || preg_match("/^[0-9]{11}$/", $userId) == 0) {
-			throw new \InvalidArgumentException("O usuário é obrigatório.");
-		}
-
 		$this->token = $token;
 		$this->userId = $userId;
-
-		if ($type === Device::ANDROID || $type === Device::IOS) {
-			$this->type = $type;
-		} else {
-			throw new \InvalidArgumentException("O tipo de dispositivo informado é inválido.");
-		}
+		$this->type = $type;
 	}
 
 	/**
