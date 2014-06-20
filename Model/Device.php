@@ -46,12 +46,21 @@ class Device implements \JsonSerializable {
 	}
 
 	/**
-	 * Identificador do dispositivo para recebimento de notificações
+	 * Identificador de push do dispositivo para recebimento de notificações
 	 *
 	 * @return string
 	 */
 	public function getToken() {
 		return $this->token;
+	}
+
+	/**
+	 * Define o identificador de push do dispositivo para o recebimento de notificações
+	 *
+	 * @param string $token Identificador de push
+	 */
+	public function setToken($token) {
+		$this->token = $token;
 	}
 
 	/**

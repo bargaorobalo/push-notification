@@ -79,8 +79,13 @@ function updateDevice() {
 	}
 
 	try {
-		DeviceManager::updateDeviceToken($device, $newToken);
-		noContent("Dispositivo atualizado com sucesso!");
+		$updated = DeviceManager::updateDeviceToken($device, $newToken);
+
+		if ($updated) {
+			noContent("Dispositivo atualizado com sucesso!");
+		} else {
+			notFound("O dispositivo informado não foi encontrado.");
+		}
 	} catch (Exception $e) {
 		internalServerError($e);
 	}
@@ -101,8 +106,11 @@ function deleteDevice() {
 	}
 
 	try {
-		DeviceManager::deleteDevice($device);
-		noContent("Dispositivo removido com sucesso.");
+		if (DeviceManager::deleteDevice($device)) {
+			noContent("Dispositivo removido com sucesso.");
+		} else {
+			notFound("O dispositivo informado não foi encontrado.");
+		}
 	} catch (Exception $e) {
 		internalServerError($e);
 	}
@@ -222,10 +230,20 @@ function internalServerError($exception) {
 
 /**
  * Define o status como conflito
+ *
  * @param string $statusReason Motivo do status http
  */
 function conflict($statusReason) {
 	setResponseStatus(HttpStatusCode::CONFLICT, $statusReason);
+}
+
+/**
+ * Define o status como não encontrado
+ *
+ * @param string $statusReason Motivo do status http
+ */
+function notFound($statusReason) {
+	setResponseStatus(HttpStatusCode::NOT_FOUND, $statusReason);
 }
 
 ?>

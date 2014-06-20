@@ -35,6 +35,12 @@ class HttpStatusCode {
 	const BAD_REQUEST = 400;
 
 	/**
+	 * A requisição contém um resource que não foi encontrado
+	 * @var unknown
+	 */
+	const NOT_FOUND = 404;
+
+	/**
 	 * A requisição contém um conflito com os recursos já existentes
 	 */
 	const CONFLICT = 409;
