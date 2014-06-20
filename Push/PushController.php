@@ -1,19 +1,19 @@
 <?php
 
-namespace Unisuam\Push;
+namespace PushNotification\Push;
 
 require_once "Model/GcmError.php";
 require_once "Push/Android/AndroidPushController.php";
 require_once "Push/Ios/IosPushController.php";
 
-use Unisuam\Model\Device;
-use Unisuam\Model\NotificationResponse;
+use PushNotification\Model\Device;
+use PushNotification\Model\NotificationResponse;
+use PushNotification\Push\Android\AndroidPushController;
+use PushNotification\Push\Ios\IosPushController;
 use Sly\NotificationPusher\PushManager;
 use Sly\NotificationPusher\Collection\DeviceCollection;
 use Sly\NotificationPusher\Model\Device as PusherDevice;
 use Sly\NotificationPusher\Model\Message;
-use Unisuam\Push\Android\AndroidPushController;
-use Unisuam\Push\Ios\IosPushController;
 
 /**
  * Controlado do push

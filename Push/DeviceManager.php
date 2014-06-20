@@ -1,8 +1,8 @@
 <?php
 
-namespace Unisuam\Push;
+namespace PushNotification\Push;
 
-use Unisuam\Model\Device;
+use PushNotification\Model\Device;
 
 /**
  * Gerenciador de dispositivos

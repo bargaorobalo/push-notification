@@ -10,11 +10,11 @@ require_once "Push/DeviceManager.php";
 require_once "Push/PushController.php";
 
 use Slim\Slim;
-use Unisuam\Model\Device;
-use Unisuam\Model\Notification;
-use Unisuam\Push\PushController;
-use Unisuam\Push\DeviceManager;
-use Unisuam\Model\HttpStatusCode;
+use PushNotification\Model\Device;
+use PushNotification\Model\Notification;
+use PushNotification\Push\PushController;
+use PushNotification\Push\DeviceManager;
+use PushNotification\Model\HttpStatusCode;
 
 error_reporting(E_ALL);
 ini_set('display_errors', 1);
@@ -199,7 +199,8 @@ function noContent($statusReason) {
 /**
  * Define o status com requisição inválida
  *
- * @param \Exception $exception Exceção ocorrida
+ * @param \Exception $exception
+ *        	Exceção ocorrida
  */
 function badRequest($exception) {
 	setResponseStatus(HttpStatusCode::BAD_REQUEST, $exception->getMessage());
@@ -208,7 +209,8 @@ function badRequest($exception) {
 /**
  * Define o status com error no servidor
  *
- * @param \Exception $exception Exceção ocorrida
+ * @param \Exception $exception
+ *        	Exceção ocorrida
  */
 function internalServerError($exception) {
 	setResponseStatus(HttpStatusCode::INTERNAL_SERVER_ERROR, $exception->getMessage());

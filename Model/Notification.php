@@ -1,6 +1,6 @@
 <?php
 
-namespace Unisuam\Model;
+namespace PushNotification\Model;
 
 /**
  * Notificação

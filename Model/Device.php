@@ -1,6 +1,6 @@
 <?php
 
-namespace Unisuam\Model;
+namespace PushNotification\Model;
 
 /**
  * Dispositivo
@@ -15,7 +15,6 @@ class Device implements \JsonSerializable {
 	 * Dispositivo IOS
 	 */
 	const IOS = 2;
-
 	protected $token;
 	protected $type;
 	protected $userId;

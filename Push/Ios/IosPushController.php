@@ -1,13 +1,13 @@
 <?php
 
-namespace Unisuam\Push\Ios;
+namespace PushNotification\Push\Ios;
 
 // FIXME por algum motivo não estava sendo carregada automaticamente
 require_once 'vendor/zendframework/zendservice-apple-apns/library/ZendService/Apple/Exception/InvalidArgumentException.php';
 
+use PushNotification\Model\FailureDevice;
 use Sly\NotificationPusher\Adapter\Apns as ApnsAdapter;
 use Sly\NotificationPusher\Model\Push;
-use Unisuam\Model\FailureDevice;
 use Sly\NotificationPusher\Adapter\Apns;
 
 class IosPushController {

@@ -1,12 +1,12 @@
 <?php
 
-namespace Unisuam\Push\Android;
+namespace PushNotification\Push\Android;
 
+use PushNotification\Model\FailureDevice;
+use PushNotification\Model\GcmError;
 use ZendService\Google\Gcm\Response;
 use Sly\NotificationPusher\Adapter\Gcm as GcmAdapter;
 use Sly\NotificationPusher\Model\Push;
-use Unisuam\Model\FailureDevice;
-use Unisuam\Model\GcmError;
 
 /**
  * Envia notificações a um Android
