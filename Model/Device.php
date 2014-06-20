@@ -15,8 +15,8 @@ class Device implements \JsonSerializable {
 	 * Dispositivo IOS
 	 */
 	const IOS = 2;
-	
-	protected $registrationId;
+
+	protected $token;
 	protected $type;
 	protected $userId;
 
@@ -34,10 +34,13 @@ class Device implements \JsonSerializable {
 	 *
 	 * @return string
 	 */
-	public function getRegistrationId() {
-		return $this->registrationId;
+	public function getToken() {
+		return $this->token;
 	}
 
+	/**
+	 * Identificador do usuário
+	 */
 	public function getUserId() {
 		return $this->userId;
 	}
@@ -45,15 +48,15 @@ class Device implements \JsonSerializable {
 	/**
 	 * Constructor
 	 *
-	 * @param string $registrationId
+	 * @param string $token
 	 *        	Identificador do dispositivo para recebimento de notificações
 	 * @param int $type
 	 *        	Tipo do dispositivo
 	 * @param string $userId
 	 *        	Identificador do usuário
 	 */
-	public function __construct($registrationId, $type, $userId) {
-		if (!$registrationId) {
+	public function __construct($token, $type, $userId) {
+		if (!$token) {
 			throw new \InvalidArgumentException("O identificador do dispositivo é obrigatório.");
 		}
 
@@ -66,7 +69,7 @@ class Device implements \JsonSerializable {
 			throw new \InvalidArgumentException("O usuário é obrigatório.");
 		}
 
-		$this->registrationId = $registrationId;
+		$this->token = $token;
 
 		if ($type === Device::ANDROID || $type === Device::IOS) {
 			$this->type = $type;

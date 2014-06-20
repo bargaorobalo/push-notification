@@ -8,6 +8,7 @@ require_once 'vendor/zendframework/zendservice-apple-apns/library/ZendService/Ap
 use Sly\NotificationPusher\Adapter\Apns as ApnsAdapter;
 use Sly\NotificationPusher\Model\Push;
 use Unisuam\Model\FailureDevice;
+use Sly\NotificationPusher\Adapter\Apns;
 
 class IosPushController {
 	/**
@@ -35,8 +36,6 @@ class IosPushController {
 	 *        	Resultado do envio da notificação
 	 * @param PushManager $pushManager
 	 *        	Gerenciador de push
-	 * @return object Registration id e motivo da falha para cada
-	 *         dispositivo que não recebeu a notificação
 	 */
 	public static function send($devices, $message, $notificationResult, $pushManager) {
 		if (iterator_count($devices->getIterator()) > 0) {
@@ -59,6 +58,17 @@ class IosPushController {
 		IosPushController::getFeedback($notificationResult, $pushManager, $apnsAdapter);
 	}
 
+	/**
+	 * Obtém o feedback do IOS (lista de token que não são mais válidos,
+	 * pois o dispositivo não está mais registrado)
+	 *
+	 * @param NotificationResult $notificationResult
+	 *        	Resultado da notificação
+	 * @param PushManager $pushManager
+	 *        	Gerenciado de push
+	 * @param Apns $apnsAdapter
+	 *        	Adaptador para envio de push ao IOS
+	 */
 	private static function getFeedback($notificationResult, $pushManager, $apnsAdapter) {
 		try {
 			// obtém os dispositivos que foram desregistrados e remove-os

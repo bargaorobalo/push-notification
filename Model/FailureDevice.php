@@ -20,8 +20,8 @@ class FailureDevice extends Device {
 	/**
 	 * Constructor
 	 *
-	 * @param string $registrationId
-	 *        	Identificador do dispositivo para recebimento de notificaçõess *
+	 * @param string $token
+	 *        	Identificador de push do dispositivo para recebimento de notificações
 	 * @param int $type
 	 *        	Tipo do dispositivo
 	 * @param string $userId
@@ -29,8 +29,8 @@ class FailureDevice extends Device {
 	 * @param string $reason
 	 *        	Motivo da falha
 	 */
-	public function __construct($registrationId, $type, $userId, $reason) {
-		parent::__construct($registrationId, $type, $userId);
+	public function __construct($token, $type, $userId, $reason) {
+		parent::__construct($token, $type, $userId);
 		$this->reason = $reason;
 	}
 }

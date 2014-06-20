@@ -58,7 +58,7 @@ function createDevice() {
  * Atualização de dispositivo
  */
 function updateDevice() {
-	$newRegistrationId = null;
+	$newToken = null;
 	$device = null;
 	$app = Slim::getInstance();
 
@@ -68,14 +68,14 @@ function updateDevice() {
 		$input = json_decode($request->getBody());
 
 		$device = getDeviceFromJson($input);
-		$newRegistrationId = $input->new_registration_id;
+		$newToken = $input->new_token;
 	} catch (Exception $e) {
 		badRequest($e);
 		return;
 	}
 
 	try {
-		DeviceManager::updateDevice($device, $newRegistrationId);
+		DeviceManager::updateDevice($device, $newToken);
 		noContent("Dispositivo atualizado com sucesso!");
 	} catch (Exception $e) {
 		internalServerError($e);
@@ -157,7 +157,7 @@ function getDeviceFromRequest($request) {
  * @return Device dispositivo
  */
 function getDeviceFromJson($input) {
-	return new Device((string) $input->registration_id, (int) $input->type, (string) $input->user_id);
+	return new Device((string) $input->token, (int) $input->type, (string) $input->user_id);
 }
 
 /**

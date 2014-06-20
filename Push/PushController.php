@@ -56,10 +56,10 @@ class PushController {
 		foreach($notification->getDevices() as $device) {
 			switch ($device->getDeviceType()) {
 				case Device::ANDROID:
-					$androidDevices->add(new PusherDevice($device->getRegistrationId()));
+					$androidDevices->add(new PusherDevice($device->getToken()));
 					break;
 				case Device::IOS:
-					$iosDevices->add(new PusherDevice($device->getRegistrationId()));
+					$iosDevices->add(new PusherDevice($device->getToken()));
 					break;
 			}
 		}

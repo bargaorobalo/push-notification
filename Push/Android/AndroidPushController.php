@@ -31,8 +31,6 @@ class AndroidPushController {
 	 *        	Resultado do envio da notificação
 	 * @param PushManager $pushManager
 	 *        	Gerenciador de push
-	 * @return object Registration id e motivo da falha para cada
-	 *         dispositivo que não recebeu a notificação
 	 */
 	public static function send($devices, $message, $notificationResult, $pushManager) {
 		if (iterator_count($devices->getIterator()) > 0) {
@@ -70,8 +68,7 @@ class AndroidPushController {
 	 *
 	 * @param object $results
 	 *        	Resultados de falha
-	 * @return object Registration id e motivo da falha para cada
-	 *         dispositivo que não recebeu a notificação
+	 * @return FailureDevice Dispositivo contendo o motivo da falha no envio da notificação
 	 */
 	private static function handleFailureResult($results) {
 		$obj = new \ArrayObject($results);
@@ -79,15 +76,15 @@ class AndroidPushController {
 		$failureDevices = array();
 
 		// itera sobre os resultados de falha para verificar o motivo,
-		// remove o dispositivo se o registration id não for mais válido
+		// remove o dispositivo se o token não for mais válido
 		while ($iterator->valid()) {
-			$registrationId = $iterator->key();
+			$token = $iterator->key();
 			$reason = $iterator->current();
 
 			if ($reason == GcmError::INVALID_REGISTRATION || $reason == GcmError::NOT_REGISTERED) {
 				// TODO remover dispositivo do banco de dados.
 			} else {
-				$failureDevices[] = new FailureDevice($registrationId, Device::ANDROID, $reason);
+				$failureDevices[] = new FailureDevice($token, Device::ANDROID, $reason);
 			}
 
 			$iterator->next();
@@ -110,8 +107,8 @@ class AndroidPushController {
 
 		// itera sobre os resultados para atualizar os identificadores dos dispositivos
 		while ($iterator->valid()) {
-			$oldRegistrationId = $iterator->key();
-			$newRegistraionId = $iterator->current()->registrationId;
+			$oldToken = $iterator->key();
+			$newToken = $iterator->current()->registrationId;
 
 			// TODO atualizar dispositivo
 

@@ -17,7 +17,7 @@ class DeviceManager {
 	 * @return Device Dispositivo criado
 	 */
 	public static function insertDevice($device) {
-		if (DeviceManager::exists($device->getRegistrationId(), $device->getUserId())) {
+		if (DeviceManager::exists($device->getToken(), $device->getUserId())) {
 			return $device;
 		}
 
@@ -31,13 +31,13 @@ class DeviceManager {
 	 *
 	 * @param Device $device
 	 *        	Dispositivo
-	 * @param string $newRegistrationId
+	 * @param string $newToken
 	 *        	Novo identificador de push do dispositivo
 	 * @return Device
 	 */
-	public static function updateDeviceRegistrationId($device, $newRegistrationId) {
+	public static function updateDeviceRegistrationId($device, $newToken) {
 		// verifica se o dispositivo existe com o registrationId antigo e atualiza se existir
-		if (DeviceManager::exists($device->getRegistrationId(), $device->getUserId())) {
+		if (DeviceManager::exists($device->getToken(), $device->getUserId())) {
 			// TODO atualizar
 			return $device;
 		}
@@ -56,12 +56,12 @@ class DeviceManager {
 	/**
 	 * Verifica se um dispositivo existe
 	 *
-	 * @param string $registrationId
+	 * @param string $token
 	 *        	Identificador de push do dispositivo
 	 * @param string $userId
 	 *        	Usuário ao qual o dispositivo está associado
 	 */
-	public static function exists($registrationId, $userId) {
-		// TODO verificar se existe um dispositivo do usuário com o registrationid informado
+	public static function exists($token, $userId) {
+		// TODO verificar se existe um dispositivo do usuário com o token informado
 	}
 }
