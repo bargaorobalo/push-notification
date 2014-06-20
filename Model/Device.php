@@ -4,6 +4,9 @@ namespace PushNotification\Model;
 
 /**
  * Dispositivo
+ *
+ * @Entity
+ * @Table(name="devices")
  */
 class Device implements \JsonSerializable {
 	/**
@@ -15,9 +18,23 @@ class Device implements \JsonSerializable {
 	 * Dispositivo IOS
 	 */
 	const IOS = 2;
-	protected $token;
-	protected $type;
-	protected $userId;
+
+	/**
+	 * @Id
+	 * @Column(type="text")
+	 */
+	private $token;
+
+	/**
+	 * @Column(type="smallint")
+	 */
+	private $type;
+
+	/**
+	 * @Id
+	 * @Column(name="user_id", type="string")
+	 */
+	private $userId;
 
 	/**
 	 * Tipo do dispositivo
@@ -39,6 +56,8 @@ class Device implements \JsonSerializable {
 
 	/**
 	 * Identificador do usuário
+	 *
+	 * @return string
 	 */
 	public function getUserId() {
 		return $this->userId;
@@ -69,6 +88,7 @@ class Device implements \JsonSerializable {
 		}
 
 		$this->token = $token;
+		$this->userId = $userId;
 
 		if ($type === Device::ANDROID || $type === Device::IOS) {
 			$this->type = $type;

@@ -35,6 +35,11 @@ class HttpStatusCode {
 	const BAD_REQUEST = 400;
 
 	/**
+	 * A requisição contém um conflito com os recursos já existentes
+	 */
+	const CONFLICT = 409;
+
+	/**
 	 * Ocorreu um erro no servidor ao processar a requisição
 	 *
 	 * @var int

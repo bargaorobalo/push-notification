@@ -1,6 +1,7 @@
 <?php
-
 namespace PushNotification\Push;
+
+require_once __DIR__."/../Database/bootstrap.php";
 
 use PushNotification\Model\Device;
 
@@ -18,10 +19,12 @@ class DeviceManager {
 	 */
 	public static function insertDevice($device) {
 		if (DeviceManager::exists($device->getToken(), $device->getUserId())) {
-			return $device;
+			return null;
 		}
 
-		// TODO criar
+		global $entityManager;
+		$entityManager->persist($device);
+		$entityManager->flush();
 
 		return $device;
 	}
@@ -35,10 +38,13 @@ class DeviceManager {
 	 *        	Novo identificador de push do dispositivo
 	 * @return Device
 	 */
-	public static function updateDeviceRegistrationId($device, $newToken) {
+	public static function updateDeviceToken($device, $newToken) {
 		// verifica se o dispositivo existe com o registrationId antigo e atualiza se existir
 		if (DeviceManager::exists($device->getToken(), $device->getUserId())) {
-			// TODO atualizar
+			$device = $em->find('\Model\Device', array("token" => $device.getToken(), "userId" => device.getUserId()));
+			$device->setToken($newToken);
+			$entityManager->persist($device);
+			$entityManager->flush();
 			return $device;
 		}
 	}
@@ -62,6 +68,15 @@ class DeviceManager {
 	 *        	Usuário ao qual o dispositivo está associado
 	 */
 	public static function exists($token, $userId) {
-		// TODO verificar se existe um dispositivo do usuário com o token informado
+		global $entityManager;
+
+		$qb = $entityManager->createQueryBuilder();
+		$qb->select('count(device.token)')
+		->from('PushNotification\Model\Device','device')
+		->where('device.token=:token')
+		->andwhere('device.userId=:userId')
+		->setParameter('token', $token)
+		->setParameter('userId', $userId);
+		return $qb->getQuery()->getSingleScalarResult() > 0;
 	}
 }

@@ -3,11 +3,16 @@ Push Notification
 
 Permite o gerenciamento de dispositivo habilitados a receber notifições por push e o envio de notificações a partir de um servidor utilizando PHP. 
 
+Pré-Requisitos:
+
+- PostgreSQL
+- php_pgsql.dll - deve está habilitado no PHP descomente a linha contendo `;extension=php_pgsql.dll` no php.ini.
+
 ### API
 
 ***Criação de Dispositivo:***
 
-- .../api.php/Devices
+- .../api.php/devices
 - Método Http: Post
 - Entrada: Json contendo os dados do dispositivo: 
 
@@ -25,7 +30,7 @@ Exemplo:
 	
 ***Atualização do token de um dispositivo:***
 
-- .../api.php/Devices
+- .../api.php/devices
 - Método Http: Put
 - Entrada: Json contendo os dados do dispositivo e o novo token: 	
 
@@ -42,7 +47,7 @@ Exemplo:
 	
 ***Remoção de dispositivo:***
 
-- .../api.php/Devices
+- .../api.php/devices
 - Método Http: Delete
 - Entrada: Json contendo os dados do dispositivo a ser removido
 
@@ -56,7 +61,7 @@ Exemplo:
 
 ***Envio de uma notificação:***
 
-- .../api.php/Notifications
+- .../api.php/notifications
 - Método Http: Post
 - Entrada: Json contendo os dados dos dispositivos que devem receber a notificação e os dados a serem enviados na notificação:
 - Resultado: JSON contendo informações sobre se houve falha geral no envio de notificações ao android e/ou ios, motivo da falha geral ocorrida e lista de dispositivos que não receberam a notificação (falha parcial).
@@ -90,9 +95,9 @@ Exemplo de entrada:
 Exemplo de resultado:
 
 	{
-		androidFailed: false
-		iosFailed: true
-		androidFailureReason: null
-		iosFailureReason: "stream_socket_client(): unable 		to connect to ssl://gateway.sandbox.push.apple.com:2195 (Connection refused)"
-		devicesNotNotified: [0]
+		"androidFailed" : false
+		"iosFailed" : true
+		"androidFailureReason" : null
+		"iosFailureReason": "stream_socket_client(): unable 		to connect to ssl://gateway.sandbox.push.apple.com:2195 (Connection refused)"
+		"devicesNotNotified" : [0]
 	}

@@ -47,8 +47,13 @@ function createDevice() {
 	}
 
 	try {
-		DeviceManager::insertDevice($device);
-		created("Dispositivo criado com sucesso.");
+		$deviceCreated = DeviceManager::insertDevice($device);
+
+		if ($deviceCreated){
+			created("Dispositivo criado com sucesso.");
+		} else {
+			conflict("O dispositivo já está cadastrado");
+		}
 	} catch (Exception $e) {
 		internalServerError($e);
 	}
@@ -66,8 +71,7 @@ function updateDevice() {
 		// obtém os dados informados
 		$request = $app->request();
 		$input = json_decode($request->getBody());
-
-		$device = getDeviceFromJson($input);
+		$device = getDeviceFromJson($input->device);
 		$newToken = $input->new_token;
 	} catch (Exception $e) {
 		badRequest($e);
@@ -75,7 +79,7 @@ function updateDevice() {
 	}
 
 	try {
-		DeviceManager::updateDevice($device, $newToken);
+		DeviceManager::updateDeviceToken($device, $newToken);
 		noContent("Dispositivo atualizado com sucesso!");
 	} catch (Exception $e) {
 		internalServerError($e);
@@ -187,7 +191,7 @@ function created($statusReason) {
 }
 
 /**
- * Define o status como NO_CONTENT
+ * Define o status como OK, mas sem nada a retornar
  *
  * @param string $statusReason
  *        	Motivo do status http
@@ -197,7 +201,7 @@ function noContent($statusReason) {
 }
 
 /**
- * Define o status com requisição inválida
+ * Define o status como requisição inválida
  *
  * @param \Exception $exception
  *        	Exceção ocorrida
@@ -207,13 +211,21 @@ function badRequest($exception) {
 }
 
 /**
- * Define o status com error no servidor
+ * Define o status como error no servidor
  *
  * @param \Exception $exception
  *        	Exceção ocorrida
  */
 function internalServerError($exception) {
 	setResponseStatus(HttpStatusCode::INTERNAL_SERVER_ERROR, $exception->getMessage());
+}
+
+/**
+ * Define o status como conflito
+ * @param string $statusReason Motivo do status http
+ */
+function conflict($statusReason) {
+	setResponseStatus(HttpStatusCode::CONFLICT, $statusReason);
 }
 
 ?>
