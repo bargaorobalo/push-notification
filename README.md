@@ -12,7 +12,35 @@ Pré-Requisitos:
 
 Todos os serviços a seguir retornam código **HttpStatus** para indicar sucesso ou erro ocorrido ao executar uma operação além da descrição do motivo do estado retornado via **X-Status-Reason**.
 
+***Consulta de Dispositivos de um Usuário:***
 
+- .../api.php/users/{:userId}/devices
+- Método Http: Post	
+- Retorno (HttpStatus e Json contendo os dados do dispositivos): 
+
+	- 200 (OK): Se consultar com sucesso
+	- 400 (Bad Request): Se a requisição for inválida
+	- 500 (Internal Server Error): Se ocorrer erro no servidor
+	
+Exemplo:
+
+	[
+		{
+			"token" : "token1",
+			"type" : 1,
+			"userId" : "11111111111"
+		},	
+		{		
+			"token" : "token2",
+			"type" : 1,
+			"userId" : "96418737091"
+		},
+		{
+			"token" : "token3",
+			"type" : 2,
+			"userId" : "96418737091"
+		}
+	]
 
 ***Criação de Dispositivo:***
 
@@ -22,19 +50,19 @@ Todos os serviços a seguir retornam código **HttpStatus** para indicar sucesso
 
 	- token: identificador de push
 	- type: tipo do dispositivo (1 = Android, 2 = IOS)
-	- user_id: identificador do usuário (CPF)
+	- userId: identificador do usuário (CPF)
 
 Exemplo:
 	
 	{
 		"token" : "token do dispositivo",
 		"type" : 1,
-		"user_id" : "11111111111"
+		"userId" : "11111111111"
 	}
 	
 - Retorno (HttpStatus): 
 
-	- 201 (Created): Se criar o dispositivo
+	- 201 (Created): Se criar o dispositivo com sucesso
 	- 400 (Bad Request): Se a requisição for inválida
 	- 409 (Conflict): Se já existir um dispositivo com o token informado
 	- 500 (Internal Server Error): Se ocorrer erro no servidor
@@ -44,17 +72,16 @@ Exemplo:
 - .../api.php/devices
 - Método Http: Put
 - Entrada: Json contendo os dados do dispositivo e o novo token: 	
-
 Exemplo:
 	
 	{
-		"old_token" : "token atual do dispositivo",
-		"new_token": "novo token do dispositivo"
+		"oldToken" : "token atual do dispositivo",
+		"newToken": "novo token do dispositivo"
 	}
 	
 - Retorno (HttpStatus): 
 
-	- 204 (No Content): Se atualizar o dispositivo
+	- 204 (No Content): Se atualizar o dispositivo com sucesso
 	- 400 (Bad Request): Se a requisição for inválida
 	- 404 (Not Found): Se não existir um dispositivo com o token informado
 	- 500 (Internal Server Error): Se ocorrer erro no servidor	
@@ -73,7 +100,7 @@ Exemplo:
 	
 - Retorno (HttpStatus): 
 
-	- 204 (No Content): Se remover o dispositivo
+	- 204 (No Content): Se remover o dispositivo com sucesso
 	- 400 (Bad Request): Se a requisição for inválida
 	- 404 (Not Found): Se não existir um dispositivo com o token informado
 	- 500 (Internal Server Error): Se ocorrer erro no servidor
@@ -83,33 +110,32 @@ Exemplo:
 - .../api.php/notifications
 - Método Http: Post
 - Entrada: Json contendo os dados dos dispositivos que devem receber a notificação e os dados a serem enviados na notificação:
-- Resultado: JSON contendo informações sobre se houve falha geral no envio de notificações ao android e/ou ios, motivo da falha geral ocorrida e lista de dispositivos que não receberam a notificação (falha parcial).
 
 Exemplo de entrada:
 	
 	{
-    	"devices" : 
+    	"users" : 
     	[ 
     		{
-    		    "token" : "token do dispositivo 1"
+    		    "userId" : "identificador usuário 1"
     		},
 	    	{
-    	    	"token" : "token do dispositivo 2"
+    	    	"userId" : "identificador usuário 2"
     		},
 	    	{
-    	    	"token" :"token do dispositivo 3"
+    	    	"userId" : "identificador usuário 3"
     		}
     	],
     	"message" : "mensagem",
 	    "data" : {
-        	 "some_data" : "exemplo",
+        	 "someData" : "exemplo",
         	 "badge" : 1
     	}
 	}
 	
-- Retorno (HttpStatus e JSON): 
+- Retorno (HttpStatus e JSON contendo informações sobre se houve falha geral no envio de notificações ao android e/ou ios, motivo da falha geral ocorrida e lista de dispositivos que não receberam a notificação (falha parcial): 
 
-	- 200 (No Content): Se a operação for efetuada com sucesso, incluirá um json com detalhes do resultado.
+	- 200 (OK): Se a operação for efetuada com sucesso, incluirá um json com detalhes do resultado.
 	- 400 (Bad Request): Se a requisição for inválida
 	- 500 (Internal Server Error): Se ocorrer erro no servidor
 	
@@ -134,12 +160,12 @@ Exemplo de json de sucesso parcial (alguns dispositivo não receberam):
 			{
 				"token" : "token1",
 				"type" : 1,
-				"user_id" : "11111111111"
+				"userId" : "11111111111"
 			},
 			{
 				"token" : "token2",
 				"type" : 2,
-				"user_id" : "11111111111"
+				"userId" : "11111111111"
 			}
 		]
 	}	
@@ -165,12 +191,12 @@ Exemplo de json de sucesso parcial para o IOS e erro geral no envio ao android:
 			{
 				"token" : "token3",
 				"type" : 2,
-				"user_id" : "11111111111"
+				"userId" : "11111111111"
 			},
 			{
 				"token" : "token2",
 				"type" : 2,
-				"user_id" : "11111111111"
+				"userId" : "11111111111"
 			}
 		]
 	}	
