@@ -10,6 +10,10 @@ Pré-Requisitos:
 
 ### API
 
+Todos os serviços a seguir retornam código **HttpStatus** para indicar sucesso ou erro ocorrido ao executar uma operação além da descrição do motivo do estado retornado via **X-Status-Reason**.
+
+
+
 ***Criação de Dispositivo:***
 
 - .../api.php/devices
@@ -28,6 +32,13 @@ Exemplo:
 		"user_id" : "11111111111"
 	}
 	
+- Retorno (HttpStatus): 
+
+	- 201 (Created): Se criar o dispositivo
+	- 400 (Bad Request): Se a requisição for inválida
+	- 409 (Conflict): Se já existir um dispositivo com o token informado
+	- 500 (Internal Server Error): Se ocorrer erro no servidor
+	
 ***Atualização do token de um dispositivo:***
 
 - .../api.php/devices
@@ -41,17 +52,31 @@ Exemplo:
 		"new_token": "novo token do dispositivo"
 	}
 	
+- Retorno (HttpStatus): 
+
+	- 204 (No Content): Se atualizar o dispositivo
+	- 400 (Bad Request): Se a requisição for inválida
+	- 404 (Not Found): Se não existir um dispositivo com o token informado
+	- 500 (Internal Server Error): Se ocorrer erro no servidor	
+	
 ***Remoção de dispositivo:***
 
 - .../api.php/devices
 - Método Http: Delete
 - Entrada: Json contendo os dados do dispositivo a ser removido
-
+	
 Exemplo:
 	
 	{
 		"token" : "token do dispositivo"
-	}	
+	}
+	
+- Retorno (HttpStatus): 
+
+	- 204 (No Content): Se remover o dispositivo
+	- 400 (Bad Request): Se a requisição for inválida
+	- 404 (Not Found): Se não existir um dispositivo com o token informado
+	- 500 (Internal Server Error): Se ocorrer erro no servidor
 
 ***Envio de uma notificação:***
 
@@ -82,12 +107,70 @@ Exemplo de entrada:
     	}
 	}
 	
-Exemplo de resultado:
+- Retorno (HttpStatus e JSON): 
+
+	- 200 (No Content): Se a operação for efetuada com sucesso, incluirá um json com detalhes do resultado.
+	- 400 (Bad Request): Se a requisição for inválida
+	- 500 (Internal Server Error): Se ocorrer erro no servidor
+	
+Exemplo de json de sucesso completo:
 
 	{
-		"androidFailed" : false
-		"iosFailed" : true
-		"androidFailureReason" : null
-		"iosFailureReason": "stream_socket_client(): unable 		to connect to ssl://gateway.sandbox.push.apple.com:2195 (Connection refused)"
+		"androidFailed" : false,
+		"iosFailed" : false,
+		"androidFailureReason" : null,
+		"iosFailureReason" : null,
+		"devicesNotNotified" : [0]
+	}	
+	
+Exemplo de json de sucesso parcial (alguns dispositivo não receberam):
+
+	{
+		"androidFailed" : false,
+		"iosFailed" : false,
+		"androidFailureReason" : null,
+		"iosFailureReason" : null,
+		"devicesNotNotified" : [
+			{
+				"token" : "token1",
+				"type" : 1,
+				"user_id" : "11111111111"
+			},
+			{
+				"token" : "token2",
+				"type" : 2,
+				"user_id" : "11111111111"
+			}
+		]
+	}	
+	
+Exemplo de json com erro geral no envio ao IOS:
+
+	{
+		"androidFailed" : false,
+		"iosFailed" : true,
+		"androidFailureReason" : null,
+		"iosFailureReason" : "stream_socket_client(): unable 		to connect to ssl://gateway.sandbox.push.apple.com:2195 (Connection refused)",
 		"devicesNotNotified" : [0]
 	}
+	
+Exemplo de json de sucesso parcial para o IOS e erro geral no envio ao android:
+
+	{
+		"androidFailed" : true,
+		"iosFailed" : false,
+		"androidFailureReason" : "MismatchSenderId",
+		"iosFailureReason" : null,
+		"devicesNotNotified" : [
+			{
+				"token" : "token3",
+				"type" : 2,
+				"user_id" : "11111111111"
+			},
+			{
+				"token" : "token2",
+				"type" : 2,
+				"user_id" : "11111111111"
+			}
+		]
+	}	

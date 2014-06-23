@@ -142,7 +142,7 @@ function sendNotification() {
 
 		foreach($input->devices as $item) {
 			if (!isset($item->token)) {
-				throw new \InvalidArgumentException("A requisição náo contém todos os dados necessários.");
+				throw new \InvalidArgumentException("A requisição não contém todos os dados necessários.");
 			}
 
 			$deviceTokens[] = $item->token;

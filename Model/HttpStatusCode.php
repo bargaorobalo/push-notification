@@ -36,12 +36,15 @@ class HttpStatusCode {
 
 	/**
 	 * A requisição contém um resource que não foi encontrado
-	 * @var unknown
+	 *
+	 * @var int
 	 */
 	const NOT_FOUND = 404;
 
 	/**
 	 * A requisição contém um conflito com os recursos já existentes
+	 *
+	 * @var int
 	 */
 	const CONFLICT = 409;
 
