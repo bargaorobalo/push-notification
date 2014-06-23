@@ -29,10 +29,21 @@ class PushController {
 	protected $pushManager;
 
 	/**
-	 * Constructor
+	 * Ambiente
+	 *
+	 * var string
 	 */
-	public function __construct() {
-		$this->pushManager = new PushManager(PushManager::ENVIRONMENT_DEV);
+	protected $environment;
+
+	/**
+	 * Constructor
+	 *
+	 * @param string $environment
+	 *        	Ambiente a ser utilizado, possíveis valores:
+	 *        	PushManager::ENVIRONMENT_DEV, PushManager:ENVIRONMENT_PROD. Valor padrão PushManager::ENVIRONMENT_DEV
+	 */
+	public function __construct($environment = PushManager::ENVIRONMENT_DEV) {
+		$this->pushManager = new PushManager($environment);
 	}
 
 	/**
@@ -67,8 +78,8 @@ class PushController {
 		$notificationResult = new NotificationResponse();
 
 		// envia as notificações
-		AndroidPushController::send($androidDevices, $message, $notificationResult, $this->pushManager);
-		IosPushController::send($iosDevices, $message, $notificationResult, $this->pushManager);
+		AndroidPushController::send($androidDevices, $message, $notificationResult, $this->pushManager, $this->environment);
+		IosPushController::send($iosDevices, $message, $notificationResult, $this->pushManager, $this->environment);
 
 		return $notificationResult;
 	}

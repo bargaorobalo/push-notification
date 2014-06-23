@@ -2,28 +2,46 @@
 
 namespace PushNotification\Push\Ios;
 
-// FIXME por algum motivo não estava sendo carregada automaticamente
 require_once 'vendor/zendframework/zendservice-apple-apns/library/ZendService/Apple/Exception/InvalidArgumentException.php';
 
 use PushNotification\Model\FailureDevice;
+use PushNotification\Push\DeviceManager;
 use Sly\NotificationPusher\Adapter\Apns as ApnsAdapter;
 use Sly\NotificationPusher\Model\Push;
 use Sly\NotificationPusher\Adapter\Apns;
+use Sly\NotificationPusher\PushManager;
 
+/**
+ * Controla o envio de notificações ao IOS
+ */
 class IosPushController {
 	/**
-	 * Caminho para o arquivo do certificado do IOS
+	 * Caminho para o arquivo do certificado do IOS para produção
 	 *
 	 * @var string
 	 */
-	const IOS_CERTIFICATE_PATH = "ck.pem"; // 'apns-certificate.pem';
+	const IOS_CERTIFICATE_PATH_PROD = 'apns-certificate.pem';
 
 	/**
-	 * Senha para o certificado do IOS
+	 * Senha para o certificado do IOS para produção
 	 *
 	 * @var string
 	 */
-	const IOS_CERTIFICATE_PASSWORD = "141707";
+	const IOS_CERTIFICATE_PASSWORD_PROD = "passprod";
+
+	/**
+	 * Caminho para o arquivo do certificado do IOS para desenvolvimento
+	 *
+	 * @var string
+	 */
+	const IOS_CERTIFICATE_PATH_DEV = 'apns-certificate-dev.pem';
+
+	/**
+	 * Senha para o certificado do IOS para desenvolvimento
+	 *
+	 * @var string
+	 */
+	const IOS_CERTIFICATE_PASSWORD_DEV = "passdev";
 
 	/**
 	 * Envia a notificação para dispositivos IOS
@@ -36,14 +54,28 @@ class IosPushController {
 	 *        	Resultado do envio da notificação
 	 * @param PushManager $pushManager
 	 *        	Gerenciador de push
+	 * @param string $environment
+	 *        	Ambiente a ser utilizado, possíveis valores:
+	 *        	PushManager::ENVIRONMENT_DEV, PushManager:ENVIRONMENT_PROD.
 	 */
-	public static function send($devices, $message, $notificationResult, $pushManager) {
+	public static function send($devices, $message, $notificationResult, $pushManager, $environment) {
 		if (iterator_count($devices->getIterator()) > 0) {
 			try {
+				$certificate = null;
+				$certificatePassword = null;
+
+				if ($environment == PushManager::ENVIRONMENT_PROD) {
+					$certificate = IosPushController::IOS_CERTIFICATE_PATH_PROD;
+					$certificatePassword = IosPushController::IOS_CERTIFICATE_PASSWORD_PROD;
+				} else {
+					$certificate = IosPushController::IOS_CERTIFICATE_PATH_DEV;
+					$certificatePassword = IosPushController::IOS_CERTIFICATE_PASSWORD_DEV;
+				}
+
 				// irá lançar exceção se o certificado não existir
 				$apnsAdapter = new ApnsAdapter(array(
-						'certificate' => IosPushController::IOS_CERTIFICATE_PATH,
-						'passPhrase' => IosPushController::IOS_CERTIFICATE_PASSWORD
+						'certificate' => $certificate,
+						'passPhrase' => $certificatePassword
 				));
 
 				$push = new Push($apnsAdapter, $devices, $message);
@@ -77,7 +109,7 @@ class IosPushController {
 
 			if ($unregisteredTokens) {
 				foreach($unregisteredTokens as $token) {
-					// TODO remover do banco
+					DeviceManager::deleteDevice($token);
 				}
 			}
 

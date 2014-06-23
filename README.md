@@ -37,11 +37,7 @@ Exemplo:
 Exemplo:
 	
 	{
-		"device": {
-			"token" : "token do dispositivo",
-			"type" : 1,
-			"user_id" : "11111111111"
-		},
+		"old_token" : "token atual do dispositivo",
 		"new_token": "novo token do dispositivo"
 	}
 	
@@ -54,9 +50,7 @@ Exemplo:
 Exemplo:
 	
 	{
-		"token" : "token do dispositivo",
-		"type" : 1,
-		"user_id" : "11111111111"
+		"token" : "token do dispositivo"
 	}	
 
 ***Envio de uma notificação:***
@@ -72,23 +66,19 @@ Exemplo de entrada:
     	"devices" : 
     	[ 
     		{
-    		    "token" : "token do dispositivo 1",
-		        "type" : 1,
-    	    	"user_id" : "11111111111"
+    		    "token" : "token do dispositivo 1"
     		},
 	    	{
-    	    	"token" : "token do dispositivo 2",
-	        	"type" : 1,
-        		"user_id" : "11111111111"
+    	    	"token" : "token do dispositivo 2"
     		},
 	    	{
-    	    	"token" :"token do dispositivo 3",
-	        	"type" : 2,
-        		"user_id" : "22222222222"
+    	    	"token" :"token do dispositivo 3"
     		}
     	],
+    	"message" : "mensagem",
 	    "data" : {
-        	 "message" : "Mensagem de Unisuam 123!"
+        	 "some_data" : "exemplo",
+        	 "badge" : 1
     	}
 	}
 	

@@ -14,8 +14,10 @@ class DeviceManager {
 	/**
 	 * Verifica se um dispositivo é válido
 	 *
-	 * @param Device $device Dispositivo
-	 * @param string $validateDeviceType True se for para validar o tipo do dispositivo, false caso contrário
+	 * @param Device $device
+	 *        	Dispositivo
+	 * @param string $validateDeviceType
+	 *        	True se for para validar o tipo do dispositivo, false caso contrário
 	 * @throws \InvalidArgumentException
 	 */
 	public static function validateDevice($device, $validateDeviceType = true) {
@@ -48,7 +50,7 @@ class DeviceManager {
 	public static function insertDevice($device) {
 		DeviceManager::validateDevice($device);
 
-		if (DeviceManager::exists($device->getToken(), $device->getUserId())) {
+		if (DeviceManager::exists($device->getToken())) {
 			return null;
 		}
 
@@ -62,21 +64,22 @@ class DeviceManager {
 	/**
 	 * Atualiza o identificador de push de um dispositivo
 	 *
-	 * @param Device $device
-	 *        	Dispositivo
+	 * @param string $oldToken
+	 *        	Identificador de push atual do dispositivo
 	 * @param string $newToken
 	 *        	Novo identificador de push do dispositivo
 	 * @return boolean True se atualizou um dispositivo, false caso contrário
 	 */
-	public static function updateDeviceToken($device, $newToken) {
-		DeviceManager::validateDevice($device, false);
+	public static function updateDeviceToken($oldToken, $newToken) {
+		if (!$oldToken || !$newToken) {
+			return false;
+		}
 
 		global $entityManager;
 
 		// busca o dispositivo
 		$device = $entityManager->find('PushNotification\Model\Device', array(
-				"token" => $device->getToken(),
-				"userId" => $device->getUserId()
+				"token" => $oldToken
 		));
 
 		// se existir atualiza-o
@@ -93,21 +96,21 @@ class DeviceManager {
 	/**
 	 * Remove um dispositivo
 	 *
-	 * @param Device $device
-	 *        	Dispositivo
+	 * @param string $token
+	 *        	Identificador de push do dispositivo
 	 * @return boolean True se removeu um dispositivo, false caso contrário
 	 */
-	public static function deleteDevice($device) {
-		DeviceManager::validateDevice($device, false);
+	public static function deleteDevice($token) {
+		if (!$token) {
+			return false;
+		}
 
 		global $entityManager;
 
 		$query = $entityManager->createQueryBuilder()
 					->delete('PushNotification\Model\Device', "device")
 					->where('device.token=:token')
-					->andwhere('device.userId=:userId')
-					->setParameter('token', $device->getToken())
-					->setParameter('userId', $device->getUserId());
+					->setParameter('token', $token);
 
 		$rows = $query->getQuery()->execute();
 		$entityManager->flush();
@@ -120,19 +123,16 @@ class DeviceManager {
 	 *
 	 * @param string $token
 	 *        	Identificador de push do dispositivo
-	 * @param string $userId
-	 *        	Usuário ao qual o dispositivo está associado
 	 */
-	public static function exists($token, $userId) {
+	public static function exists($token) {
 		global $entityManager;
 
 		$qb = $entityManager->createQueryBuilder();
 		$qb->select('count(device.token)')
-				->from('PushNotification\Model\Device', 'device')
-				->where('device.token=:token')
-				->andwhere('device.userId=:userId')
-				->setParameter('token', $token)
-				->setParameter('userId', $userId);
+			->from('PushNotification\Model\Device', 'device')
+			->where('device.token=:token')
+			->setParameter('token', $token);
+
 		return $qb->getQuery()->getSingleScalarResult() > 0;
 	}
 }

@@ -4,9 +4,11 @@ namespace PushNotification\Push\Android;
 
 use PushNotification\Model\FailureDevice;
 use PushNotification\Model\GcmError;
+use PushNotification\Push\DeviceManager;
 use ZendService\Google\Gcm\Response;
 use Sly\NotificationPusher\Adapter\Gcm as GcmAdapter;
 use Sly\NotificationPusher\Model\Push;
+use Sly\NotificationPusher\PushManager;
 
 /**
  * Envia notificações a um Android
@@ -14,11 +16,18 @@ use Sly\NotificationPusher\Model\Push;
 class AndroidPushController {
 
 	/**
-	 * Chave da api do ANDROID
+	 * Chave da api do ANDROID para produção
 	 *
 	 * @var string
 	 */
-	const ANDROID_API_KEY = "AIzaSyApbMAGOln9XY4MgXFUD_RnqgoHv2jEt8M";
+	const ANDROID_API_KEY_PROD = "AIzaSyApbMAGOln9XY4MgXFUD_RnqgoHv2jEt8M";
+
+	/**
+	 * Chave da api do ANDROID para desenvolvimento
+	 *
+	 * @var string
+	 */
+	const ANDROID_API_KEY_DEV = "AIzaSyApbMAGOln9XY4MgXFUD_RnqgoHv2jEt8M";
 
 	/**
 	 * Envia a notificação para dispositivos Android
@@ -31,12 +40,18 @@ class AndroidPushController {
 	 *        	Resultado do envio da notificação
 	 * @param PushManager $pushManager
 	 *        	Gerenciador de push
+	 * @param string $environment
+	 *        	Ambiente a ser utilizado, possíveis valores:
+	 *        	PushManager::ENVIRONMENT_DEV, PushManager:ENVIRONMENT_PROD.
 	 */
-	public static function send($devices, $message, $notificationResult, $pushManager) {
+	public static function send($devices, $message, $notificationResult, $pushManager, $environment) {
 		if (iterator_count($devices->getIterator()) > 0) {
 			try {
+				$apiKey = $environment == PushManager::ENVIRONMENT_PROD ? AndroidPushController::ANDROID_API_KEY_PROD
+											: AndroidPushController::ANDROID_API_KEY_DEV;
+
 				$gcmAdapter = new GcmAdapter(array(
-						'apiKey' => AndroidPushController::ANDROID_API_KEY
+						'apiKey' => $apiKey
 				));
 
 				// envia as notificações
@@ -82,7 +97,7 @@ class AndroidPushController {
 			$reason = $iterator->current();
 
 			if ($reason == GcmError::INVALID_REGISTRATION || $reason == GcmError::NOT_REGISTERED) {
-				// TODO remover dispositivo do banco de dados.
+				DeviceManager::deleteDevice($token);
 			} else {
 				$failureDevices[] = new FailureDevice($token, Device::ANDROID, $reason);
 			}
@@ -110,7 +125,7 @@ class AndroidPushController {
 			$oldToken = $iterator->key();
 			$newToken = $iterator->current()->registrationId;
 
-			// TODO atualizar dispositivo
+			DeviceManager::updateDevice($oldToken, $newToken);
 
 			$iterator->next();
 		}

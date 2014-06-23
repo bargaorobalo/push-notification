@@ -31,7 +31,6 @@ class Device implements \JsonSerializable {
 	private $type;
 
 	/**
-	 * @Id
 	 * @Column(name="user_id", type="string")
 	 */
 	private $userId;

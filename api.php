@@ -40,7 +40,8 @@ function createDevice() {
 	$app = Slim::getInstance();
 
 	try {
-		$device = getDeviceFromRequest($app->request());
+		$input = json_decode($app->request()->getBody());
+		$device = getDevice($input);
 	} catch (Exception $e) {
 		badRequest($e);
 		return;
@@ -49,7 +50,7 @@ function createDevice() {
 	try {
 		$deviceCreated = DeviceManager::insertDevice($device);
 
-		if ($deviceCreated){
+		if ($deviceCreated) {
 			created("Dispositivo criado com sucesso.");
 		} else {
 			conflict("O dispositivo já está cadastrado");
@@ -63,28 +64,23 @@ function createDevice() {
  * Atualização de dispositivo
  */
 function updateDevice() {
-	$newToken = null;
-	$device = null;
+	$input = null;
 	$app = Slim::getInstance();
 
 	try {
 		// obtém os dados informados
-		$request = $app->request();
-		$input = json_decode($request->getBody());
+		$input = json_decode($app->request()->getBody());
 
-		if (!$input || !isset($input->devices) || !isset($input->new_token)) {
+		if (!$input || !isset($input->old_token) || !isset($input->new_token)) {
 			throw new \InvalidArgumentException("A requisição náo contém todos os dados necessários.");
 		}
-
-		$device = getDeviceFromJson($input->device);
-		$newToken = $input->new_token;
 	} catch (Exception $e) {
 		badRequest($e);
 		return;
 	}
 
 	try {
-		$updated = DeviceManager::updateDeviceToken($device, $newToken);
+		$updated = DeviceManager::updateDeviceToken($input->old_token, $input->new_token);
 
 		if ($updated) {
 			noContent("Dispositivo atualizado com sucesso!");
@@ -100,18 +96,23 @@ function updateDevice() {
  * Remoção de dispositivo
  */
 function deleteDevice() {
-	$device = null;
+	$input = null;
 	$app = Slim::getInstance();
 
 	try {
-		$device = getDeviceFromRequest($app->request());
+		// obtém os dados informados
+		$input = json_decode($app->request()->getBody());
+
+		if (!$input || !isset($input->token)) {
+			throw new \InvalidArgumentException("O identificador do dispositivo não foi informado.");
+		}
 	} catch (Exception $e) {
 		badRequest($e);
 		return;
 	}
 
 	try {
-		if (DeviceManager::deleteDevice($device)) {
+		if (DeviceManager::deleteDevice($input->token)) {
 			noContent("Dispositivo removido com sucesso.");
 		} else {
 			notFound("O dispositivo informado não foi encontrado.");
@@ -130,8 +131,7 @@ function sendNotification() {
 
 	try {
 		// leitura da notificação informado no post
-		$request = $app->request();
-		$input = json_decode($request->getBody());
+		$input = json_decode($app->request()->getBody());
 
 		if (!$input || (!isset($input->message) && !isset($input->data)) || !isset($input->devices)) {
 			throw new \InvalidArgumentException("A requisição náo contém todos os dados necessários.");
@@ -140,7 +140,7 @@ function sendNotification() {
 		$devices = array();
 
 		foreach($input->devices as $inputDevice) {
-			$devices[] = getDeviceFromJson($inputDevice);
+			$devices[] = getDevice($inputDevice);
 		}
 
 		$message = isset($input->message) ? $input->message : null;
@@ -163,24 +163,13 @@ function sendNotification() {
 }
 
 /**
- * Retorna um dispositivo informado no request
- *
- * @param \Slim\Http\Request $request
- * @return \Unisuam\Model\Device dispositivo
- */
-function getDeviceFromRequest($request) {
-	$input = json_decode($request->getBody());
-	return getDeviceFromJson($input);
-}
-
-/**
- * Retorna um dispositivo informado via json, validando-o
+ * Retorna um dispositivo informado, validando-o
  *
  * @param object $input
- *        	Json
+ *        	Dados informados
  * @return Device dispositivo
  */
-function getDeviceFromJson($input) {
+function getDevice($input) {
 	if (!$input || !isset($input->token) || !isset($input->type) || !isset($input->user_id)) {
 		throw new \InvalidArgumentException("A requisição náo contém todos os dados necessários.");
 	}
@@ -191,7 +180,7 @@ function getDeviceFromJson($input) {
 }
 
 /**
- * Define
+ * Define o status de resposta para a requisição
  *
  * @param int $statusCode
  *        	Código de status http
@@ -205,10 +194,8 @@ function setResponseStatus($statusCode, $statusReason) {
 }
 
 /**
- * Define
+ * Define o status como resource criado
  *
- * @param int $statusCode
- *        	Código de status http
  * @param string $statusReason
  *        	Motivo do status http
  */
@@ -249,7 +236,8 @@ function internalServerError($exception) {
 /**
  * Define o status como conflito
  *
- * @param string $statusReason Motivo do status http
+ * @param string $statusReason
+ *        	Motivo do status http
  */
 function conflict($statusReason) {
 	setResponseStatus(HttpStatusCode::CONFLICT, $statusReason);
@@ -258,7 +246,8 @@ function conflict($statusReason) {
 /**
  * Define o status como não encontrado
  *
- * @param string $statusReason Motivo do status http
+ * @param string $statusReason
+ *        	Motivo do status http
  */
 function notFound($statusReason) {
 	setResponseStatus(HttpStatusCode::NOT_FOUND, $statusReason);
