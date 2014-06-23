@@ -94,7 +94,7 @@ function getDevices() {
 		$limit = (int) $request->params("limit");
 		$order = $request->params("order");
 
-		$devices = DeviceManager::getAllDevices($page, $limit, $order);
+		$devices = DeviceManager::getDevices($page, $limit, $order);
 
 		$app->response()->header('Content-Type', 'application/json');
 		echo json_encode($devices);
