@@ -26,11 +26,84 @@ Slim::registerAutoloader();
 
 // inicializa e configura as rotas
 $app = new Slim();
+$app->get('/user/:userId/devices', 'getUserDevices');
+$app->get('/devices/', 'getDevices');
 $app->post('/devices', 'createDevice');
 $app->put('/devices', 'updateDevice');
 $app->delete('/devices', "deleteDevice");
 $app->post('/notifications', "sendNotification");
 $app->run();
+
+/**
+ * Busca de dispositivos de um usuário
+ *
+ * @param string $userId Identificador do usuário
+ */
+function getUserDevices($userId) {
+	$app = Slim::getInstance();
+
+	try {
+		$devices = DeviceManager::getDevicesByUserId($userId);
+
+		$app->response()->header('Content-Type', 'application/json');
+		echo json_encode($devices);
+	} catch (\InvalidArgumentException $e) {
+		badRequest($e);
+	} catch (Exception $e) {
+		internalServerError($e);
+	}
+}
+
+/**
+ * Busca de um dispositivo pelo identificador
+ *
+ * @param string $token Identificador do dispositivo
+ */
+function getDeviceByToken($token) {
+	//TODO definir como receberá o token
+	$app = Slim::getInstance();
+
+	try {
+		$device = DeviceManager::getDevice($token);
+
+		$app->response()->header('Content-Type', 'application/json');
+		echo json_encode($device);
+	} catch (\InvalidArgumentException $e) {
+		badRequest($e);
+	} catch (Exception $e) {
+		internalServerError($e);
+	}
+}
+
+/**
+ * Busca todos os dispositivos.
+ *
+ * Permite a paginação dos resultados através dos seguintes parâmetros:
+ * 	- page : página a ser buscada
+ *  - limit : limite de resultados a retornar
+ *
+ * Permite a ordernação dos resultados através do parâmetro order,
+ * ele deve ser uma string contendo os campos de ordenação separados por vírgula.
+ */
+function getDevices() {
+	$app = Slim::getInstance();
+
+	try {
+		$request = $app->request();
+		$page = (int) $request->params("page");
+		$limit = (int) $request->params("limit");
+		$order = $request->params("order");
+
+		$devices = DeviceManager::getAllDevices($page, $limit, $order);
+
+		$app->response()->header('Content-Type', 'application/json');
+		echo json_encode($devices);
+	} catch (\InvalidArgumentException $e) {
+		badRequest($e);
+	} catch (Exception $e) {
+		internalServerError($e);
+	}
+}
 
 /**
  * Criação de dispositivo
@@ -71,7 +144,7 @@ function updateDevice() {
 		// obtém os dados informados
 		$input = json_decode($app->request()->getBody());
 
-		if (!$input || !isset($input->old_token) || !isset($input->new_token)) {
+		if (!$input || !isset($input->oldToken) || !isset($input->newToken)) {
 			throw new \InvalidArgumentException("A requisição náo contém todos os dados necessários.");
 		}
 	} catch (Exception $e) {
@@ -80,7 +153,7 @@ function updateDevice() {
 	}
 
 	try {
-		$updated = DeviceManager::updateDeviceToken($input->old_token, $input->new_token);
+		$updated = DeviceManager::updateDeviceToken($input->oldToken, $input->newToken);
 
 		if ($updated) {
 			noContent("Dispositivo atualizado com sucesso!");
@@ -133,22 +206,22 @@ function sendNotification() {
 		// leitura da notificação informado no post
 		$input = json_decode($app->request()->getBody());
 
-		if (!$input || (!isset($input->message) && !isset($input->data)) || !isset($input->devices)) {
+		if (!$input || (!isset($input->message) && !isset($input->data)) || !isset($input->users)) {
 			throw new \InvalidArgumentException("A requisição náo contém todos os dados necessários.");
 		}
 
 		$devices = array();
-		$deviceTokens = array();
+		$userIds = array();
 
-		foreach($input->devices as $item) {
-			if (!isset($item->token)) {
+		foreach($input->users as $item) {
+			if (!isset($item->userId)) {
 				throw new \InvalidArgumentException("A requisição não contém todos os dados necessários.");
 			}
 
-			$deviceTokens[] = $item->token;
+			$userIds[] = $item->userId;
 		}
 
-		$devices = DeviceManager::getDevices($deviceTokens);
+		$devices = DeviceManager::getDevicesByUsers($userIds);
 
 		$message = isset($input->message) ? $input->message : null;
 		$data = isset($input->data) ? json_decode(json_encode($input->data), true) : null;
@@ -174,14 +247,14 @@ function sendNotification() {
  *
  * @param object $input
  *        	Dados informados
- * @return Device dispositivo
+ * @return Device Dispositivo
  */
 function getDevice($input) {
-	if (!$input || !isset($input->token) || !isset($input->type) || !isset($input->user_id)) {
+	if (!$input || !isset($input->token) || !isset($input->type) || !isset($input->userId)) {
 		throw new \InvalidArgumentException("A requisição náo contém todos os dados necessários.");
 	}
 
-	$device = new Device((string) $input->token, (int) $input->type, (string) $input->user_id);
+	$device = new Device((string) $input->token, (int) $input->type, (string) $input->userId);
 	DeviceManager::validateDevice($device);
 	return $device;
 }
