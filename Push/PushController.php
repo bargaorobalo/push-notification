@@ -50,7 +50,7 @@ class PushController {
 
 		$iosDevices = new DeviceCollection();
 		$androidDevices = new DeviceCollection();
-		$message = new Message(json_encode($notification->getData()));
+		$message = new Message($notification->getMessage(), $notification->getData());
 
 		// separa os dispositivos por tipo
 		foreach($notification->getDevices() as $device) {

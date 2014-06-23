@@ -8,6 +8,7 @@ namespace PushNotification\Model;
 class Notification {
 	protected $devices;
 	protected $data;
+	protected $message;
 
 	/**
 	 * Dispositivos
@@ -21,26 +22,38 @@ class Notification {
 	/**
 	 * Dados da notificação
 	 *
-	 * @return object
+	 * @return array
 	 */
 	public function getData() {
 		return $this->data;
 	}
 
 	/**
+	 * Mensagem
+	 *
+	 * @return string
+	 */
+	public function getMessage() {
+		return $this->message;
+	}
+
+	/**
 	 * Constructor
 	 *
-	 * @param string $devices
-	 *        	Identificador do dispositivo para recebimento de notificaçõess
-	 * @param int $type
-	 *        	Tipo do dispositivo
+	 * @param Device[] $devices
+	 *        	Identificador de push dos dispositivos que receberão a notificação
+	 * @param string $message
+	 *        	Mensagem a ser enviada
+	 * @param array $data
+	 *        	Dados extras
 	 */
-	public function __construct($devices, $data) {
-		if (!$devices || !$data) {
-			throw new \InvalidArgumentException("Os dispositivos e o conteúdo da notificação são obrigatórios.");
+	public function __construct($devices, $message, $data) {
+		if (!$devices || (!$message && !$data)) {
+			throw new \InvalidArgumentException("Os dispositivos e o conteúdo (mensagem ou dados extras) da notificação são obrigatórios.");
 		}
 
 		$this->devices = $devices;
+		$this->message = $message;
 		$this->data = $data;
 	}
 }

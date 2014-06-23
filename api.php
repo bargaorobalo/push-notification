@@ -72,6 +72,10 @@ function updateDevice() {
 		$request = $app->request();
 		$input = json_decode($request->getBody());
 
+		if (!$input || !isset($input->devices) || !isset($input->new_token)) {
+			throw new \InvalidArgumentException("A requisição náo contém todos os dados necessários.");
+		}
+
 		$device = getDeviceFromJson($input->device);
 		$newToken = $input->new_token;
 	} catch (Exception $e) {
@@ -128,13 +132,20 @@ function sendNotification() {
 		// leitura da notificação informado no post
 		$request = $app->request();
 		$input = json_decode($request->getBody());
+
+		if (!$input || (!isset($input->message) && !isset($input->data)) || !isset($input->devices)) {
+			throw new \InvalidArgumentException("A requisição náo contém todos os dados necessários.");
+		}
+
 		$devices = array();
 
 		foreach($input->devices as $inputDevice) {
 			$devices[] = getDeviceFromJson($inputDevice);
 		}
 
-		$notification = new Notification($devices, $input->data->message);
+		$message = isset($input->message) ? $input->message : null;
+		$data = isset($input->data) ? json_decode(json_encode($input->data), true) : null;
+		$notification = new Notification($devices, $message, $data);
 	} catch (Exception $e) {
 		badRequest($e);
 		return;
@@ -170,6 +181,10 @@ function getDeviceFromRequest($request) {
  * @return Device dispositivo
  */
 function getDeviceFromJson($input) {
+	if (!$input || !isset($input->token) || !isset($input->type) || !isset($input->user_id)) {
+		throw new \InvalidArgumentException("A requisição náo contém todos os dados necessários.");
+	}
+
 	$device = new Device((string) $input->token, (int) $input->type, (string) $input->user_id);
 	DeviceManager::validateDevice($device);
 	return $device;
