@@ -138,10 +138,13 @@ function sendNotification() {
 		}
 
 		$devices = array();
+		$deviceTokens = array();
 
-		foreach($input->devices as $inputDevice) {
-			$devices[] = getDevice($inputDevice);
+		foreach($input->devices as $item) {
+			$deviceTokens[] = $item->token;
 		}
+
+		$devices = DeviceManager::getDevices($deviceTokens);
 
 		$message = isset($input->message) ? $input->message : null;
 		$data = isset($input->data) ? json_decode(json_encode($input->data), true) : null;

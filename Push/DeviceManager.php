@@ -11,6 +11,8 @@ use PushNotification\Model\Device;
  */
 class DeviceManager {
 
+	const DEVICE_REPOSITORY = "PushNotification\Model\Device";
+
 	/**
 	 * Verifica se um dispositivo é válido
 	 *
@@ -37,6 +39,21 @@ class DeviceManager {
 		if ($validateDeviceType && (!$type || ($type != Device::ANDROID && $type != Device::IOS))) {
 			throw new \InvalidArgumentException("O tipo do dispositivo não foi informado ou é inválido.");
 		}
+	}
+
+	/**
+	 * Busca os dispositivos com os tokens informados
+	 *
+	 * @param string[] $tokens
+	 */
+	public static function getDevices($tokens) {
+		if (!$tokens || !is_array($tokens)) {
+			return null;
+		}
+
+		global $entityManager;
+
+		return $entityManager->getRepository(DeviceManager::DEVICE_REPOSITORY)->findBy(array("token" => $tokens));
 	}
 
 	/**
@@ -78,7 +95,7 @@ class DeviceManager {
 		global $entityManager;
 
 		// busca o dispositivo
-		$device = $entityManager->find('PushNotification\Model\Device', array(
+		$device = $entityManager->find(DeviceManager::DEVICE_REPOSITORY, array(
 				"token" => $oldToken
 		));
 
@@ -107,12 +124,12 @@ class DeviceManager {
 
 		global $entityManager;
 
-		$query = $entityManager->createQueryBuilder()
-					->delete('PushNotification\Model\Device', "device")
-					->where('device.token=:token')
-					->setParameter('token', $token);
+		$queryBuilder = $entityManager->createQueryBuilder()
+							->delete(DeviceManager::DEVICE_REPOSITORY, "device")
+							->where('device.token=:token')
+							->setParameter('token', $token);
 
-		$rows = $query->getQuery()->execute();
+		$rows = $queryBuilder->getQuery()->execute();
 		$entityManager->flush();
 
 		return $rows > 0;
@@ -127,12 +144,12 @@ class DeviceManager {
 	public static function exists($token) {
 		global $entityManager;
 
-		$qb = $entityManager->createQueryBuilder();
-		$qb->select('count(device.token)')
-			->from('PushNotification\Model\Device', 'device')
+		$queryBuilder = $entityManager->createQueryBuilder();
+		$queryBuilder->select('count(device.token)')
+			->from(DeviceManager::DEVICE_REPOSITORY, 'device')
 			->where('device.token=:token')
 			->setParameter('token', $token);
 
-		return $qb->getQuery()->getSingleScalarResult() > 0;
+		return $queryBuilder->getQuery()->getSingleScalarResult() > 0;
 	}
 }

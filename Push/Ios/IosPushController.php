@@ -59,25 +59,25 @@ class IosPushController {
 	 *        	PushManager::ENVIRONMENT_DEV, PushManager:ENVIRONMENT_PROD.
 	 */
 	public static function send($devices, $message, $notificationResult, $pushManager, $environment) {
+		$certificate = null;
+		$certificatePassword = null;
+
+		if ($environment == PushManager::ENVIRONMENT_PROD) {
+			$certificate = IosPushController::IOS_CERTIFICATE_PATH_PROD;
+			$certificatePassword = IosPushController::IOS_CERTIFICATE_PASSWORD_PROD;
+		} else {
+			$certificate = IosPushController::IOS_CERTIFICATE_PATH_DEV;
+			$certificatePassword = IosPushController::IOS_CERTIFICATE_PASSWORD_DEV;
+		}
+
+		// irá lançar exceção se o certificado não existir
+		$apnsAdapter = new ApnsAdapter(array(
+				'certificate' => $certificate,
+				'passPhrase' => $certificatePassword
+		));
+
 		if (iterator_count($devices->getIterator()) > 0) {
 			try {
-				$certificate = null;
-				$certificatePassword = null;
-
-				if ($environment == PushManager::ENVIRONMENT_PROD) {
-					$certificate = IosPushController::IOS_CERTIFICATE_PATH_PROD;
-					$certificatePassword = IosPushController::IOS_CERTIFICATE_PASSWORD_PROD;
-				} else {
-					$certificate = IosPushController::IOS_CERTIFICATE_PATH_DEV;
-					$certificatePassword = IosPushController::IOS_CERTIFICATE_PASSWORD_DEV;
-				}
-
-				// irá lançar exceção se o certificado não existir
-				$apnsAdapter = new ApnsAdapter(array(
-						'certificate' => $certificate,
-						'passPhrase' => $certificatePassword
-				));
-
 				$push = new Push($apnsAdapter, $devices, $message);
 				$pushManager->add($push);
 				$pushManager->push();
@@ -87,21 +87,19 @@ class IosPushController {
 			}
 		}
 
-		IosPushController::getFeedback($notificationResult, $pushManager, $apnsAdapter);
+		IosPushController::getFeedback($pushManager, $apnsAdapter);
 	}
 
 	/**
 	 * Obtém o feedback do IOS (lista de token que não são mais válidos,
 	 * pois o dispositivo não está mais registrado)
 	 *
-	 * @param NotificationResult $notificationResult
-	 *        	Resultado da notificação
 	 * @param PushManager $pushManager
 	 *        	Gerenciado de push
 	 * @param Apns $apnsAdapter
 	 *        	Adaptador para envio de push ao IOS
 	 */
-	private static function getFeedback($notificationResult, $pushManager, $apnsAdapter) {
+	private static function getFeedback($pushManager, $apnsAdapter) {
 		try {
 			// obtém os dispositivos que foram desregistrados e remove-os
 			$unregisteredTokens = $pushManager->getFeedback($apnsAdapter);
@@ -112,8 +110,6 @@ class IosPushController {
 					DeviceManager::deleteDevice($token);
 				}
 			}
-
-			$notificationResult->addDevicesNotNotified($failureDevices);
 		} catch (\Exception $e) {
 			// nada a fazer, irá tentar novamente na próxima vez que enviar notificações
 		}
