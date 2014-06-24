@@ -12,6 +12,8 @@ Pré-Requisitos:
 
 Todos os serviços a seguir retornam código **HttpStatus** para indicar sucesso ou erro ocorrido ao executar uma operação além da descrição do motivo do estado retornado via **X-Status-Reason**.
 
+Além disso, todos os serviços devem receber no cabeçalho HTTP o token de acesso a API (`Authorization token`).
+
 ***Consulta de Usuários que possuem dispositivos cadastrados***
 
 - .../api.php/users?page=1&limit=2
@@ -25,6 +27,7 @@ Todos os serviços a seguir retornam código **HttpStatus** para indicar sucesso
 
 	- 200 (OK): Se consultar com sucesso
 	- 400 (Bad Request): Se a requisição for inválida
+	- 401 (Unauthorized): Se o acesso for negado
 	- 500 (Internal Server Error): Se ocorrer erro no servidor
 	
 Exemplo:
@@ -49,6 +52,7 @@ Exemplo:
 
 	- 200 (OK): Se consultar com sucesso
 	- 400 (Bad Request): Se a requisição for inválida
+	- 401 (Unauthorized): Se o acesso for negado
 	- 500 (Internal Server Error): Se ocorrer erro no servidor
 	
 Exemplo:
@@ -88,6 +92,7 @@ Exemplo:
 
 	- 201 (Created): Se criar o dispositivo com sucesso
 	- 400 (Bad Request): Se a requisição for inválida
+	- 401 (Unauthorized): Se o acesso for negado
 	- 409 (Conflict): Se já existir um dispositivo com o token informado
 	- 500 (Internal Server Error): Se ocorrer erro no servidor
 	
@@ -95,18 +100,21 @@ Exemplo:
 
 - .../api.php/devices
 - Método Http: Put
-- Entrada: Json contendo os dados do dispositivo e o novo token: 	
-Exemplo:
+- Entrada: Json contendo os dados do dispositivo e o novo token: 
+	
+Exemplo: 
 	
 	{
 		"oldToken" : "token atual do dispositivo",
-		"newToken": "novo token do dispositivo"
+		"newToken": "novo token do dispositivo",
+		"userId" : "11111111111"
 	}
 	
 - Retorno (HttpStatus): 
 
 	- 204 (No Content): Se atualizar o dispositivo com sucesso
 	- 400 (Bad Request): Se a requisição for inválida
+	- 401 (Unauthorized): Se o acesso for negado
 	- 404 (Not Found): Se não existir um dispositivo com o token informado
 	- 500 (Internal Server Error): Se ocorrer erro no servidor	
 	
@@ -126,6 +134,7 @@ Exemplo:
 
 	- 204 (No Content): Se remover o dispositivo com sucesso
 	- 400 (Bad Request): Se a requisição for inválida
+	- 401 (Unauthorized): Se o acesso for negado
 	- 404 (Not Found): Se não existir um dispositivo com o token informado
 	- 500 (Internal Server Error): Se ocorrer erro no servidor
 
@@ -161,6 +170,7 @@ Exemplo de entrada:
 
 	- 200 (OK): Se a operação for efetuada com sucesso, incluirá um json com detalhes do resultado.
 	- 400 (Bad Request): Se a requisição for inválida
+	- 401 (Unauthorized): Se o acesso for negado
 	- 500 (Internal Server Error): Se ocorrer erro no servidor
 	
 Exemplo de json de sucesso completo:

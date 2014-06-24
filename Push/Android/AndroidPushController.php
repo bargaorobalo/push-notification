@@ -16,20 +16,6 @@ use Sly\NotificationPusher\PushManager;
 class AndroidPushController {
 
 	/**
-	 * Chave da api do ANDROID para produção
-	 *
-	 * @var string
-	 */
-	const ANDROID_API_KEY_PROD = "AIzaSyApbMAGOln9XY4MgXFUD_RnqgoHv2jEt8M";
-
-	/**
-	 * Chave da api do ANDROID para desenvolvimento
-	 *
-	 * @var string
-	 */
-	const ANDROID_API_KEY_DEV = "AIzaSyApbMAGOln9XY4MgXFUD_RnqgoHv2jEt8M";
-
-	/**
 	 * Envia a notificação para dispositivos Android
 	 *
 	 * @param Device[] $devices
@@ -40,19 +26,11 @@ class AndroidPushController {
 	 *        	Resultado do envio da notificação
 	 * @param PushManager $pushManager
 	 *        	Gerenciador de push
-	 * @param string $environment
-	 *        	Ambiente a ser utilizado, possíveis valores:
-	 *        	PushManager::ENVIRONMENT_DEV, PushManager:ENVIRONMENT_PROD.
 	 */
-	public static function send($devices, $message, $notificationResult, $pushManager, $environment) {
+	public static function send($devices, $message, $notificationResult, $pushManager) {
 		if (iterator_count($devices->getIterator()) > 0) {
 			try {
-				$apiKey = $environment == PushManager::ENVIRONMENT_PROD ? AndroidPushController::ANDROID_API_KEY_PROD
-											: AndroidPushController::ANDROID_API_KEY_DEV;
-
-				$gcmAdapter = new GcmAdapter(array(
-						'apiKey' => $apiKey
-				));
+				$gcmAdapter = new GcmAdapter(array('apiKey' => ANDROID_API_KEY));
 
 				// envia as notificações
 				$push = new Push($gcmAdapter, $devices, $message);

@@ -45,8 +45,10 @@ class DeviceManager {
 	/**
 	 * Busca todos os usuários que possuem dispositivos
 	 *
-	 * @param int $page Página a ser retornada
-	 * @param int $limit Limite de resultados a retornar
+	 * @param int $page
+	 *        	Página a ser retornada
+	 * @param int $limit
+	 *        	Limite de resultados a retornar
 	 * @return array Usuários e total de usuários
 	 */
 	public static function getUsersWithDevices($page, $limit) {
@@ -67,7 +69,6 @@ class DeviceManager {
 
 		$offset = $limit ? $limit * ($page - 1) : ($page - 1);
 
-
 		// busca o total de usuários
 		$queryBuilder = $entityManager->createQueryBuilder();
 		$queryBuilder = $entityManager->createQueryBuilder();
@@ -82,8 +83,12 @@ class DeviceManager {
 		$queryBuilder->select('device.userId')
 						->from(DeviceManager::DEVICE_REPOSITORY, 'device')
 						->distinct()
-						->setFirstResult($offset)
-						->setMaxResults($limit);
+						->setFirstResult($offset);
+
+		if ($limit) {
+			$queryBuilder->setMaxResults($limit);
+		}
+
 		$users = $queryBuilder->getQuery()->execute();
 
 		return array("users" => $users, "total" => $total);
@@ -92,7 +97,8 @@ class DeviceManager {
 	/**
 	 * Busca os dispositivos com os tokens informados
 	 *
-	 * @param string[] $userIds Identificadores dos usuários aos quais o dispositivos deve pertencer
+	 * @param string[] $userIds
+	 *        	Identificadores dos usuários aos quais o dispositivos deve pertencer
 	 * @return Device[] Dispositivos
 	 */
 	public static function getDevicesByUsers($userIds) {
@@ -102,13 +108,16 @@ class DeviceManager {
 
 		global $entityManager;
 
-		return $entityManager->getRepository(DeviceManager::DEVICE_REPOSITORY)->findBy(array("userId" => $userIds));
+		return $entityManager->getRepository(DeviceManager::DEVICE_REPOSITORY)->findBy(array(
+				"userId" => $userIds
+		));
 	}
 
 	/**
 	 * Busca os dispositivos cadastrados de um usuário
 	 *
-	 * @param string $userId Identificador do usuário
+	 * @param string $userId
+	 *        	Identificador do usuário
 	 * @return Devices[] Dispositivos
 	 */
 	public static function getDevicesByUserId($userId) {
@@ -125,7 +134,8 @@ class DeviceManager {
 	/**
 	 * Busca um dispositivo por seu identificador
 	 *
-	 * @param string $token Identificador do dispositivo
+	 * @param string $token
+	 *        	Identificador do dispositivo
 	 * @return Device Dispositivo
 	 */
 	public static function getDevice($token) {
@@ -135,7 +145,8 @@ class DeviceManager {
 
 		global $entityManager;
 
-		return $entityManager->getRepository(DeviceManager::DEVICE_REPOSITORY)->findOneBy(array("token" => $token));
+		return $entityManager->getRepository(DeviceManager::DEVICE_REPOSITORY)
+								->findOneBy(array("token" => $token));
 	}
 
 	/**
@@ -167,23 +178,25 @@ class DeviceManager {
 	 *        	Identificador de push atual do dispositivo
 	 * @param string $newToken
 	 *        	Novo identificador de push do dispositivo
+	 * @param string $userId
+	 * 			Identificador do usuário
 	 * @return boolean True se atualizou um dispositivo, false caso contrário
 	 */
-	public static function updateDeviceToken($oldToken, $newToken) {
-		if (!$oldToken || !is_string($oldToken) || !$newToken || !is_string($newToken)) {
+	public static function updateDevice($oldToken, $newToken, $userId) {
+		if (!$oldToken || !is_string($oldToken) || !$newToken || !is_string($newToken)
+			|| !$userId || !is_string($userId)) {
 			return false;
 		}
 
 		global $entityManager;
 
 		// busca o dispositivo
-		$device = $entityManager->find(DeviceManager::DEVICE_REPOSITORY, array(
-				"token" => $oldToken
-		));
+		$device = $entityManager->find(DeviceManager::DEVICE_REPOSITORY, array("token" => $oldToken));
 
 		// se existir atualiza-o
 		if ($device) {
 			$device->setToken($newToken);
+			$device->setUserId($userId);
 			$entityManager->persist($device);
 			$entityManager->flush();
 			return true;

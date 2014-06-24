@@ -8,16 +8,18 @@ require_once "Model/HttpStatusCode.php";
 require_once "Model/NotificationResponse.php";
 require_once "Push/DeviceManager.php";
 require_once "Push/PushController.php";
+require_once "Authorization/Authorization.php";
 
 use Slim\Slim;
 use PushNotification\Model\Device;
 use PushNotification\Model\Notification;
+use PushNotification\Model\HttpStatusCode;
 use PushNotification\Push\PushController;
 use PushNotification\Push\DeviceManager;
-use PushNotification\Model\HttpStatusCode;
+use PushNotification\Authorization\Authorization;
 
-error_reporting(E_ALL);
 ini_set('display_errors', 1);
+error_reporting(E_ALL);
 
 date_default_timezone_set("UTC");
 
@@ -26,12 +28,12 @@ Slim::registerAutoloader();
 
 // inicializa e configura as rotas
 $app = new Slim();
-$app->get('/users/:userId/devices', 'getUserDevices');
-$app->get('/users', 'getUsers');
-$app->post('/devices', 'createDevice');
-$app->put('/devices', 'updateDevice');
-$app->delete('/devices', "deleteDevice");
-$app->post('/notifications', "sendNotification");
+$app->get	('/users/:userId/devices',	'authorize',	'getUserDevices');
+$app->get	('/users', 					'authorize',	'getUsers');
+$app->post	('/devices', 				'authorize',	'createDevice');
+$app->put	('/devices',				'authorize',	'updateDevice');
+$app->delete('/devices', 				'authorize',	'deleteDevice');
+$app->post	('/notifications',			'authorize',	'sendNotification');
 $app->run();
 
 /**
@@ -119,7 +121,7 @@ function updateDevice() {
 		// obtém os dados informados
 		$input = json_decode($app->request()->getBody());
 
-		if (!$input || !isset($input->oldToken) || !isset($input->newToken)) {
+		if (!$input || !isset($input->oldToken) || !isset($input->newToken) || !isset($input->userId)) {
 			throw new \InvalidArgumentException("A requisição náo contém todos os dados necessários.");
 		}
 	} catch (Exception $e) {
@@ -128,7 +130,7 @@ function updateDevice() {
 	}
 
 	try {
-		$updated = DeviceManager::updateDeviceToken($input->oldToken, $input->newToken);
+		$updated = DeviceManager::updateDevice($input->oldToken, $input->newToken, $input->userId);
 
 		if ($updated) {
 			noContent("Dispositivo atualizado com sucesso!");
@@ -232,6 +234,34 @@ function getDevice($input) {
 	$device = new Device((string) $input->token, (int) $input->type, (string) $input->userId);
 	DeviceManager::validateDevice($device);
 	return $device;
+}
+
+
+/**
+ * Adding Middle Layer to authenticate every request
+ * Checking if the request has valid api key in the 'Authorization' header
+ */
+function authorize(\Slim\Route $route) {
+	$app = \Slim\Slim::getInstance();
+	$headers = apache_request_headers();
+	$authorizationHeader = $headers["Authorization"];
+
+	// verifica se o token de acesso foi informado, se foi verifica se está possui acesso
+	if (!isset($authorizationHeader) || !Authorization::isAuthorized($authorizationHeader)) {
+		unauthorized();
+	}
+}
+
+/**
+ * Define o status como não autorizado e bloqueia a chamada da API
+ */
+function unauthorized() {
+	// nenhuma aplicação encontrada com o token informado
+	// token de acesso não informado no cabeçalho
+	$app = Slim::getInstance();
+	$app->response()->status(HttpStatusCode::UNAUTHORIZED);
+	$app->response()->header('X-Status-Reason', "O acesso foi negado.");
+	$app->stop();
 }
 
 /**

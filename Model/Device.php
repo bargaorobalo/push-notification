@@ -72,6 +72,15 @@ class Device implements \JsonSerializable {
 	}
 
 	/**
+	 * Define o identificador do usuário
+	 *
+	 * @param string $userId
+	 */
+	public function setUserId($userId) {
+		$this->userId = $userId;
+	}
+
+	/**
 	 * Constructor
 	 *
 	 * @param string $token

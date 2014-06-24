@@ -35,6 +35,13 @@ class HttpStatusCode {
 	const BAD_REQUEST = 400;
 
 	/**
+	 * A requisição não possue o cabeçalho de autorização ou o cliente não foi autorizado
+	 *
+	 * @var int
+	 */
+	const UNAUTHORIZED = 401;
+
+	/**
 	 * A requisição contém um resource que não foi encontrado
 	 *
 	 * @var int
