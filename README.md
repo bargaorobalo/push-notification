@@ -12,10 +12,39 @@ Pré-Requisitos:
 
 Todos os serviços a seguir retornam código **HttpStatus** para indicar sucesso ou erro ocorrido ao executar uma operação além da descrição do motivo do estado retornado via **X-Status-Reason**.
 
+***Consulta de Usuários que possuem dispositivos cadastrados***
+
+- .../api.php/users?page=1&limit=2
+- Método Http: Get
+- Parâmetros (opcionais)
+
+	- page : página a ser retornada
+	- limit: quantidade máxima de resultados a retornar
+	 
+- Retorno (HttpStatus e Json contendo os identificadores dos usuários e quantidade total de usuários encontrados): 
+
+	- 200 (OK): Se consultar com sucesso
+	- 400 (Bad Request): Se a requisição for inválida
+	- 500 (Internal Server Error): Se ocorrer erro no servidor
+	
+Exemplo:
+
+	{
+		"users" : [
+			{
+				"userId" : "11111111111"
+			},	
+			{
+				"userId" : "22222222222"
+			}
+		],
+		"total" : 5		
+	} 
+
 ***Consulta de Dispositivos de um Usuário:***
 
 - .../api.php/users/{:userId}/devices
-- Método Http: Post	
+- Método Http: Get
 - Retorno (HttpStatus e Json contendo os dados do dispositivos): 
 
 	- 200 (OK): Se consultar com sucesso
@@ -25,20 +54,15 @@ Todos os serviços a seguir retornam código **HttpStatus** para indicar sucesso
 Exemplo:
 
 	[
-		{
-			"token" : "token1",
-			"type" : 1,
-			"userId" : "11111111111"
-		},	
 		{		
 			"token" : "token2",
 			"type" : 1,
-			"userId" : "96418737091"
+			"userId" : "11111111111"
 		},
 		{
 			"token" : "token3",
 			"type" : 2,
-			"userId" : "96418737091"
+			"userId" : "11111111111"
 		}
 	]
 

@@ -43,46 +43,50 @@ class DeviceManager {
 	}
 
 	/**
-	 * Busca todos os dispositivos
+	 * Busca todos os usuários que possuem dispositivos
 	 *
 	 * @param int $page Página a ser retornada
 	 * @param int $limit Limite de resultados a retornar
-	 * @param string $order Campos para ordenação separados por vírgula
-	 * @return Device[] Dispositivos
+	 * @return array Usuários e total de usuários
 	 */
-	public static function getDevices($page, $limit, $order) {
+	public static function getUsersWithDevices($page, $limit) {
 
 		// verifica se a página foi informada, se não for usa o padrão
 		if (!$page) {
 			$page = 1;
-		} else if (!is_int($page)) {
+		} else if (!is_int($page) || $page < 1) {
 			throw new \InvalidArgumentException("A página informada é inválida.");
 		}
 
-		//TODO ordenação
-
-		// verifica se a ordenação foi informada, se não for usa o padrão
-		if (!$order) {
-			//$order  = "userId, type, token";
-		} else if (!is_string($order)) {
-			throw new \InvalidArgumentException("A ordenação informada é inválida.");
-		}
-
 		// verifica se o limite foi informado e é válido
-		if (($limit && !is_int($limit))) {
+		if ($limit && !is_int($limit)) {
 			throw new \InvalidArgumentException("O limite informado é inválido.");
 		}
 
 		global $entityManager;
 
-		$repository = $entityManager->getRepository(DeviceManager::DEVICE_REPOSITORY);
+		$offset = $limit ? $limit * ($page - 1) : ($page - 1);
 
-		if ($limit) {
-			$offset = $limit * ($page - 1);
-			return $repository->findBy(array(), null, $limit, $offset);
-		} else {
-			return $repository->findAll(array());
-		}
+
+		// busca o total de usuários
+		$queryBuilder = $entityManager->createQueryBuilder();
+		$queryBuilder = $entityManager->createQueryBuilder();
+		$queryBuilder->select('count(device.userId)')
+						->from(DeviceManager::DEVICE_REPOSITORY, 'device')
+						->distinct();
+
+		$total = $queryBuilder->getQuery()->getSingleScalarResult();
+
+		// busca os usuários
+		$queryBuilder = $entityManager->createQueryBuilder();
+		$queryBuilder->select('device.userId')
+						->from(DeviceManager::DEVICE_REPOSITORY, 'device')
+						->distinct()
+						->setFirstResult($offset)
+						->setMaxResults($limit);
+		$users = $queryBuilder->getQuery()->execute();
+
+		return array("users" => $users, "total" => $total);
 	}
 
 	/**

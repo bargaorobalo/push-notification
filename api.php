@@ -26,13 +26,39 @@ Slim::registerAutoloader();
 
 // inicializa e configura as rotas
 $app = new Slim();
-$app->get('/user/:userId/devices', 'getUserDevices');
-$app->get('/devices/', 'getDevices');
+$app->get('/users/:userId/devices', 'getUserDevices');
+$app->get('/users', 'getUsers');
 $app->post('/devices', 'createDevice');
 $app->put('/devices', 'updateDevice');
 $app->delete('/devices', "deleteDevice");
 $app->post('/notifications', "sendNotification");
 $app->run();
+
+/**
+ * Busca usuários que possuem dispositivos cadastrados
+ *
+ * Permite paginação através do parâmetros:
+ * 	- page: página a ser retornada
+ * 	- limit: quantidade de resultados a serem retornados
+ */
+function getUsers() {
+	$app = Slim::getInstance();
+
+	try {
+		$request = $app->request();
+		$page = (int) $request->params('page');
+		$limit = (int) $request->params('limit');
+
+		$users = DeviceManager::getUsersWithDevices($page, $limit);
+
+		$app->response()->header('Content-Type', 'application/json');
+		echo json_encode($users);
+	} catch (\InvalidArgumentException $e) {
+		badRequest($e);
+	} catch (Exception $e) {
+		internalServerError($e);
+	}
+}
 
 /**
  * Busca de dispositivos de um usuário
@@ -44,57 +70,6 @@ function getUserDevices($userId) {
 
 	try {
 		$devices = DeviceManager::getDevicesByUserId($userId);
-
-		$app->response()->header('Content-Type', 'application/json');
-		echo json_encode($devices);
-	} catch (\InvalidArgumentException $e) {
-		badRequest($e);
-	} catch (Exception $e) {
-		internalServerError($e);
-	}
-}
-
-/**
- * Busca de um dispositivo pelo identificador
- *
- * @param string $token Identificador do dispositivo
- */
-function getDeviceByToken($token) {
-	//TODO definir como receberá o token
-	$app = Slim::getInstance();
-
-	try {
-		$device = DeviceManager::getDevice($token);
-
-		$app->response()->header('Content-Type', 'application/json');
-		echo json_encode($device);
-	} catch (\InvalidArgumentException $e) {
-		badRequest($e);
-	} catch (Exception $e) {
-		internalServerError($e);
-	}
-}
-
-/**
- * Busca todos os dispositivos.
- *
- * Permite a paginação dos resultados através dos seguintes parâmetros:
- * 	- page : página a ser buscada
- *  - limit : limite de resultados a retornar
- *
- * Permite a ordernação dos resultados através do parâmetro order,
- * ele deve ser uma string contendo os campos de ordenação separados por vírgula.
- */
-function getDevices() {
-	$app = Slim::getInstance();
-
-	try {
-		$request = $app->request();
-		$page = (int) $request->params("page");
-		$limit = (int) $request->params("limit");
-		$order = $request->params("order");
-
-		$devices = DeviceManager::getDevices($page, $limit, $order);
 
 		$app->response()->header('Content-Type', 'application/json');
 		echo json_encode($devices);
