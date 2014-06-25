@@ -125,7 +125,7 @@ Exemplo em Javascrip:
 	- page : página a ser retornada
 	- limit: quantidade máxima de resultados a retornar
 	 
-- Retorno (HttpStatus e Json contendo os identificadores dos usuários e quantidade total de usuários encontrados): 
+- Retorno (HttpStatus e Json contendo os identificadores dos usuários, a página atual e o total de páginas): 
 
 	- 200 (OK): Se consultar com sucesso
 	- 400 (Bad Request): Se a requisição for inválida
@@ -143,7 +143,8 @@ Exemplo:
 				"userId" : "22222222222"
 			}
 		],
-		"total" : 5		
+		"page" : 1,
+		"totalPages" : 3
 	} 
 
 ***Consulta de Dispositivos de um Usuário:***

@@ -48,8 +48,8 @@ class Notification {
 	 *        	Dados extras
 	 */
 	public function __construct($devices, $message, $data) {
-		if (!$devices || (!$message && !$data)) {
-			throw new \InvalidArgumentException("Os dispositivos e o conteúdo (mensagem ou dados extras) da notificação são obrigatórios.");
+		if ((!$message && !$data)) {
+			throw new \InvalidArgumentException("O conteúdo (mensagem ou dados extras) da notificação é obrigatório.");
 		}
 
 		$this->devices = $devices;

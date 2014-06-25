@@ -45,23 +45,25 @@ class DeviceManager {
 	/**
 	 * Busca todos os usuários que possuem dispositivos
 	 *
+	 *
 	 * @param int $page
-	 *        	Página a ser retornada
+	 *        	Página a ser retornada, somente utilizado quando o limite for informado
 	 * @param int $limit
 	 *        	Limite de resultados a retornar
 	 * @return array Usuários e total de usuários
 	 */
 	public static function getUsersWithDevices($page, $limit) {
 
-		// verifica se a página foi informada, se não for usa o padrão
-		if (!$page) {
+		// verifica se a página foi informada, se não foi informada
+		// ou o limite não foi informa usa o padrão,
+		if (!$page || !$limit) {
 			$page = 1;
 		} else if (!is_int($page) || $page < 1) {
 			throw new \InvalidArgumentException("A página informada é inválida.");
 		}
 
 		// verifica se o limite foi informado e é válido
-		if ($limit && !is_int($limit)) {
+		if ($limit && (!is_int($limit) || $limit < 0)) {
 			throw new \InvalidArgumentException("O limite informado é inválido.");
 		}
 
@@ -72,9 +74,8 @@ class DeviceManager {
 		// busca o total de usuários
 		$queryBuilder = $entityManager->createQueryBuilder();
 		$queryBuilder = $entityManager->createQueryBuilder();
-		$queryBuilder->select('count(device.userId)')
-						->from(DeviceManager::DEVICE_REPOSITORY, 'device')
-						->distinct();
+		$queryBuilder->select('count(distinct device.userId)')
+						->from(DeviceManager::DEVICE_REPOSITORY, 'device');
 
 		$total = $queryBuilder->getQuery()->getSingleScalarResult();
 
@@ -90,8 +91,12 @@ class DeviceManager {
 		}
 
 		$users = $queryBuilder->getQuery()->execute();
+		$recordsFrom = null;
+		$recordsTo = null;
 
-		return array("users" => $users, "total" => $total);
+		$totalPages = $limit ? ceil($total / $limit) : 1;
+
+		return array("users" => $users, "page" => $page, "totalPages" => $totalPages);
 	}
 
 	/**
