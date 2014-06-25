@@ -11,24 +11,21 @@ require_once __DIR__ . "/../Database/bootstrap.php";
  * Os tokens foram gerados utilizando: //base64_encode( openssl_random_pseudo_bytes(32));
  */
 class ApplicationManager {
-
 	const APPLICATION_REPOSITORY = "PushNotification\Model\Application";
 
 	/**
-	 * Busca os dispositivos cadastrados de um usuário
+	 * Busca uma aplicação pelo seu identificador
 	 *
-	 * @param string $token
-	 *        	Token de acesso
-	 * @return Application Aplicação
+	 * @param int $id
+	 *        	Identificador
+	 * @return \Application Aplicação
 	 */
-	public static function getApplicationByToken($token) {
-		if (!$token || !is_string($token)) {
+	public static function getApplication($id) {
+		if (!$id || !is_int($id)) {
 			return null;
 		}
 
 		global $entityManager;
-
-		return $entityManager->getRepository(ApplicationManager::APPLICATION_REPOSITORY)
-				->findBy(array("token" => $token));
+		return $entityManager->find(ApplicationManager::APPLICATION_REPOSITORY, $id);
 	}
 }

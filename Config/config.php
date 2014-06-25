@@ -18,3 +18,6 @@ define( 'ANDROID_API_KEY', 			"AIzaSyApbMAGOln9XY4MgXFUD_RnqgoHv2jEt8M");
 // push - IOS
 define( 'IOS_CERTIFICATE_PATH', 	'apns-certificate.pem');
 define( 'IOS_CERTIFICATE_PASSWORD', 'pass');
+
+// Autorização
+define( 'AUTHORIZATION_ENABLED', true);

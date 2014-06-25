@@ -1,5 +1,6 @@
 <?php
 require_once "vendor/autoload.php";
+require_once "Config/config.php";
 require_once "Model/Device.php";
 require_once "Model/Notification.php";
 require_once "Model/FailureDevice.php";
@@ -27,7 +28,10 @@ date_default_timezone_set("UTC");
 Slim::registerAutoloader();
 
 // inicializa e configura as rotas
-$app = new Slim();
+$app = new Slim(array(
+    'mode' => ENVIRONMENT == ENVIRONMENT_PROD ? 'production' : 'development'
+));
+
 $app->get	('/users/:userId/devices',	'authorize',	'getUserDevices');
 $app->get	('/users', 					'authorize',	'getUsers');
 $app->post	('/devices', 				'authorize',	'createDevice');
@@ -228,7 +232,7 @@ function sendNotification() {
  */
 function getDevice($input) {
 	if (!$input || !isset($input->token) || !isset($input->type) || !isset($input->userId)) {
-		throw new \InvalidArgumentException("A requisição náo contém todos os dados necessários.");
+		throw new \InvalidArgumentException("A requisição não contém todos os dados necessários.");
 	}
 
 	$device = new Device((string) $input->token, (int) $input->type, (string) $input->userId);
@@ -242,13 +246,26 @@ function getDevice($input) {
  * Checking if the request has valid api key in the 'Authorization' header
  */
 function authorize(\Slim\Route $route) {
-	$app = \Slim\Slim::getInstance();
-	$headers = apache_request_headers();
-	$authorizationHeader = $headers["Authorization"];
+	if (AUTHORIZATION_ENABLED) {
+		$app = \Slim\Slim::getInstance();
+		$headers = apache_request_headers();
 
-	// verifica se o token de acesso foi informado, se foi verifica se está possui acesso
-	if (!isset($authorizationHeader) || !Authorization::isAuthorized($authorizationHeader)) {
-		unauthorized();
+		if (!isset($headers["Authorization"])) {
+			unauthorized();
+		}
+
+		$authorizationHeader = $headers["Authorization"];
+		$method = $app->request()->getMethod();
+		$data = null;
+
+		if ($method == "POST") {
+			$data = $app->request()->getBody();
+		}
+
+		// verifica se o token de acesso foi informado, se foi verifica se está possui acesso
+		if (!isset($authorizationHeader) || !Authorization::isAuthorized($authorizationHeader, $data)) {
+			unauthorized();
+		}
 	}
 }
 
@@ -259,8 +276,7 @@ function unauthorized() {
 	// nenhuma aplicação encontrada com o token informado
 	// token de acesso não informado no cabeçalho
 	$app = Slim::getInstance();
-	$app->response()->status(HttpStatusCode::UNAUTHORIZED);
-	$app->response()->header('X-Status-Reason', "O acesso foi negado.");
+	setResponseStatus(HttpStatusCode::UNAUTHORIZED, "O acesso foi negado.");
 	$app->stop();
 }
 

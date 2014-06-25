@@ -25,7 +25,7 @@ class Application {
 	/**
 	 * @Column(type="text")
 	 */
-	private $token = null;
+	private $secret = null;
 
 	/**
 	 * Identificador da aplicação
@@ -64,20 +64,20 @@ class Application {
 	}
 
 	/**
-	 * Token de acesso a API
+	 * Segredo que permite o acesso a API
 	 *
 	 * @return string
 	 */
-	public function getToken() {
-		return $this->token;
+	public function getSecret() {
+		return $this->secret;
 	}
 
 	/**
-	 * Define o token de acesso a API
+	 * Define o segredo que permite o acesso a API
 	 *
 	 * @param string $token
 	 */
-	public function setToken($token) {
-		$this->token = $token;
+	public function setSecret($secret) {
+		$this->secret = $secret;
 	}
 }
