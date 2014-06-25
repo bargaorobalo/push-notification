@@ -32,6 +32,10 @@ $app = new Slim(array(
     'mode' => ENVIRONMENT == ENVIRONMENT_PROD ? 'production' : 'development'
 ));
 
+if (CROSS_ORIGIN_ENABLED) {
+	$app->response()->header('Access-Control-Allow-Origin', ACCESS_CONTROL_ALLOW_ORIGIN);
+}
+
 $app->get	('/users/:userId/devices',	'authorize',	'getUserDevices');
 $app->get	('/users', 					'authorize',	'getUsers');
 $app->post	('/devices', 				'authorize',	'createDevice');

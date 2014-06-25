@@ -3,16 +3,118 @@ Push Notification
 
 Permite o gerenciamento de dispositivo habilitados a receber notifições por push e o envio de notificações a partir de um servidor utilizando PHP. 
 
-Pré-Requisitos:
+### Configuração
 
-- PostgreSQL
-- php_pgsql.dll - deve está habilitado no PHP descomente a linha contendo `;extension=php_pgsql.dll` no php.ini.
+A configuração é feita através do arquivo config.php que está na pasta config, é possível configurar os seguintes dados:
+
+- Ambiente
+	- 	ENVIRONMENT: desenvolvimento (ENVIRONMENT_DEV) ou produção (ENVIRONMENT_PROD)
+	
+- Database:	
+	- DB_DRIVER: driver a ser utilizado
+	- DB_USER: usuário para acesso ao banco de dados
+	- DB_PASSWORD: senha do usuário
+	- DB_NAME: nome do banco de dados
+	- DB_HOST: servidor do banco de dados
+	- DB_PORT: porta do servidor do banco de dados
+	
+- Push
+	- ANDROID_API_KEY: chave que permite o envio de push ao android
+	- IOS_CERTIFICATE_PATH: caminho para o arquivo do certificado que permite o envio de push ao IOS
+	- IOS_CERTIFICATE_PASSWORD: senha para o acesso ao certificado
+	
+- Autorização:
+	- 	AUTHORIZATION_ENABLED: true se a autorização estiver habilitada, falso caso contrário (não deve ser desabilitada em produção).
+	
+- Acesso
+	- CROSS_ORIGIN_ENABLED: Indica se permitirá o acesso entre domínios
+	- ACCESS_CONTROL_ALLOW_ORIGIN: Domínios que terão acesso se o acesso entre domínios estiver habilitado.
+
 
 ### API
 
 Todos os serviços a seguir retornam código **HttpStatus** para indicar sucesso ou erro ocorrido ao executar uma operação além da descrição do motivo do estado retornado via **X-Status-Reason**.
 
-Além disso, todos os serviços devem receber no cabeçalho HTTP o token de acesso a API (`Authorization token`).
+Além disso, todos os serviços devem receber no cabeçalho HTTP o token de acesso a API.
+
+***Criando um Token de Autorização***
+
+Um aplicação cliente receberá acesso ao informar um token de acesso criado a partir dos dados de acesso disponibilizados:
+
+	- appId: Identificador da aplicação
+	- secret: Segredo da aplicação (esse segredo não deve ser tornar público).
+	
+Para gerar um token a aplicação deve concatena as seguintes informações (nessa ordem):
+	
+	- appId: Identificador da aplicação
+	- secret: Segredo da aplicação
+	- Unix timestamp : número de segundos desde 01/01/1970
+	- data: dados a serem enviados via post, se existirem
+		
+A aplicação deve aplicar HmacSha256 sobre a string resultante utilizando como chave o segredo disponibilizado e retornando o resultado em base64.
+
+Para finalizar a aplicação deve criar um json com os seguintes dados.
+
+	- appId: Identificador da aplicação
+	- timestamp: Unix timestamp utilizado no passo anterior
+	- signature: resultado do HmacSha256
+	
+Exemplo:
+
+	{
+		"appId": 1,
+		"timestamp": 1403701797,
+		"signature": "TpRaYDhRf7r4IakcX8nQOTa+icPQvs0TFQVAfxiiUTA="
+	};	
+
+Esse json deve ser codificado em base64 e enviado no cabeçalho de autorização do HTTP (Authorization)	
+	
+	Authorization eyJhcHBJZCI6MSwidGltZXN0YW1wIjoxNDAzNzAxNzk3LCJzaWduYXR1cmUiOiJUcFJhWURoUmY3cjRJYWtjWDhuUU9UYStpY1BRdnMwVEZRVkFmeGlpVVRBPSJ9
+	
+Exemplo em Javascrip:
+
+	var data = {
+		users : [ {
+			userId : "11111111111"
+		},
+		{
+			userId : "22222222222"
+		}],
+		message : "Mensagem",
+		data : {
+			someData : "data1",
+		    badge: 1
+		}
+	}
+
+	var secret = "appSecret";
+
+	var obj = {
+		appId: 1,
+	    timestamp: Math.floor((new Date).getTime() / 1000),
+		signature: null
+	};
+
+	var dataJson = JSON.stringify(data);
+	var tokenData = obj.appId + secret + obj.timestamp + dataJson;
+
+	obj.signature = CryptoJS.HmacSHA256(tokenData, secret).toString(CryptoJS.enc.Base64);
+
+	var token = JSON.stringify(obj);
+	var tokenUtf8 = CryptoJS.enc.Utf8.parse(token);
+	var tokenBase64 = CryptoJS.enc.Base64.stringify(tokenUtf8);
+
+	$.ajax({
+		url: "http://localhost/api.php/notifications",
+		type: 'POST',
+		beforeSend: function (xhr) {
+			xhr.setRequestHeader('Authorization', tokenBase64);
+		},
+		data: dataJson,
+		contentType: 'application/json',
+		success: successCallback,
+		error: errorCallback
+	});
 
 ***Consulta de Usuários que possuem dispositivos cadastrados***
 
