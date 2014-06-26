@@ -262,7 +262,7 @@ function authorize(\Slim\Route $route) {
 		$method = $app->request()->getMethod();
 		$data = null;
 
-		if ($method == "POST") {
+		if ($method != "GET") {
 			$data = $app->request()->getBody();
 		}
 
@@ -326,6 +326,7 @@ function noContent($statusReason) {
  */
 function badRequest($exception) {
 	setResponseStatus(HttpStatusCode::BAD_REQUEST, $exception->getMessage());
+	echo $exception->getMessage();
 }
 
 /**
@@ -336,6 +337,7 @@ function badRequest($exception) {
  */
 function internalServerError($exception) {
 	setResponseStatus(HttpStatusCode::INTERNAL_SERVER_ERROR, $exception->getMessage());
+	echo $exception->getMessage();
 }
 
 /**
