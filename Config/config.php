@@ -13,14 +13,14 @@ define( 'DB_HOST',     	'localhost' );
 define( 'DB_PORT',  	'5432' );
 
 // push - Android
-define( 'ANDROID_API_KEY', 			"AIzaSyApbMAGOln9XY4MgXFUD_RnqgoHv2jEt8M");
+define( 'ANDROID_API_KEY', 			"AIzaSyABnEeaeeQXmAkUm795SFN16Z6_hrTFbho");
 
 // push - IOS
-define( 'IOS_CERTIFICATE_PATH', 	'certificates/apns-certificate.pem');
-define( 'IOS_CERTIFICATE_PASSWORD', 'pass');
+define( 'IOS_CERTIFICATE_PATH', 	'unisuam/UnisuamAlunosCK.pem');
+define( 'IOS_CERTIFICATE_PASSWORD', 'unisuam-alunos');
 
 // Autorização
-define( 'AUTHORIZATION_ENABLED', true);
+define( 'AUTHORIZATION_ENABLED', false);
 
 // Acesso
 define( 'CROSS_ORIGIN_ENABLED', true);

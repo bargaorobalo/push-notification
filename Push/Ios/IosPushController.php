@@ -4,7 +4,6 @@ namespace PushNotification\Push\Ios;
 
 require_once 'vendor/zendframework/zendservice-apple-apns/library/ZendService/Apple/Exception/InvalidArgumentException.php';
 
-use PushNotification\Model\FailureDevice;
 use PushNotification\Push\DeviceManager;
 use Sly\NotificationPusher\Adapter\Apns as ApnsAdapter;
 use Sly\NotificationPusher\Model\Push;
@@ -65,7 +64,6 @@ class IosPushController {
 		try {
 			// obtém os dispositivos que foram desregistrados e remove-os
 			$unregisteredTokens = $pushManager->getFeedback($apnsAdapter);
-			$failureDevices = array();
 
 			if ($unregisteredTokens) {
 				foreach($unregisteredTokens as $token) {

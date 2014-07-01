@@ -2,6 +2,7 @@
 
 namespace PushNotification\Push\Android;
 
+use PushNotification\Model\Device;
 use PushNotification\Model\FailureDevice;
 use PushNotification\Model\GcmError;
 use PushNotification\Push\DeviceManager;
