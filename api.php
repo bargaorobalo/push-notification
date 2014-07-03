@@ -38,6 +38,7 @@ if (CROSS_ORIGIN_ENABLED) {
 
 $app->get	('/users/:userId/devices',	'authorize',	'getUserDevices');
 $app->get	('/users', 					'authorize',	'getUsers');
+$app->get	('/devices', 				'authorize',	'getDevices');
 $app->post	('/devices', 				'authorize',	'createDevice');
 $app->put	('/devices',				'authorize',	'updateDevice');
 $app->delete('/devices', 				'authorize',	'deleteDevice');
@@ -63,6 +64,32 @@ function getUsers() {
 
 		$app->response()->header('Content-Type', 'application/json');
 		echo json_encode($users);
+	} catch (\InvalidArgumentException $e) {
+		badRequest($e);
+	} catch (Exception $e) {
+		internalServerError($e);
+	}
+}
+
+/**
+ * Busca os dispositivos cadastrados ordenados por usuário e tipo
+ *
+ * Permite paginação através do parâmetros:
+ * 	- page: página a ser retornada
+ * 	- limit: quantidade de resultados a serem retornados
+ */
+function getDevices() {
+	$app = Slim::getInstance();
+
+	try {
+		$request = $app->request();
+		$page = (int) $request->params('page');
+		$limit = (int) $request->params('limit');
+
+		$devices = DeviceManager::getAllDevices($page, $limit);
+
+		$app->response()->header('Content-Type', 'application/json');
+		echo json_encode($devices);
 	} catch (\InvalidArgumentException $e) {
 		badRequest($e);
 	} catch (Exception $e) {

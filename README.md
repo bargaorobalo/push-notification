@@ -147,6 +147,41 @@ Exemplo:
 		"totalPages" : 3
 	} 
 
+***Consulta de dispositivos cadastrados***
+
+- .../api.php/devices?page=1&limit=2
+- Método Http: Get
+- Parâmetros (opcionais)
+
+	- page : página a ser retornada
+	- limit: quantidade máxima de resultados a retornar
+	 
+- Retorno (HttpStatus e Json contendo os dispositivos, a página atual e o total de páginas): 
+
+	- 200 (OK): Se consultar com sucesso
+	- 400 (Bad Request): Se a requisição for inválida
+	- 401 (Unauthorized): Se o acesso for negado
+	- 500 (Internal Server Error): Se ocorrer erro no servidor
+	
+Exemplo:
+
+	{
+	   "devices" : [
+			{		
+				"token" : "token2",
+				"type" : 1,
+				"userId" : "11111111111"
+			},
+			{	
+				"token" : "token3",
+				"type" : 2,
+				"userId" : "11111111111"
+			}
+		],
+		"page" : 1,
+		"totalPages" : 5
+	}
+	
 ***Consulta de Dispositivos de um Usuário:***
 
 - .../api.php/users/{:userId}/devices

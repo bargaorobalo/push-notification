@@ -56,7 +56,7 @@ class DeviceManager {
 
 		// verifica se a página foi informada, se não foi informada
 		// ou o limite não foi informa usa o padrão,
-		if (!$page || !$limit) {
+		if (!$page) {
 			$page = 1;
 		} else if (!is_int($page) || $page < 1) {
 			throw new \InvalidArgumentException("A página informada é inválida.");
@@ -68,8 +68,6 @@ class DeviceManager {
 		}
 
 		global $entityManager;
-
-		$offset = $limit ? $limit * ($page - 1) : ($page - 1);
 
 		// busca o total de usuários
 		$queryBuilder = $entityManager->createQueryBuilder();
@@ -83,20 +81,73 @@ class DeviceManager {
 		$queryBuilder = $entityManager->createQueryBuilder();
 		$queryBuilder->select('device.userId')
 						->from(DeviceManager::DEVICE_REPOSITORY, 'device')
-						->distinct()
-						->setFirstResult($offset);
+						->distinct();
 
 		if ($limit) {
+			$offset = $limit * ($page - 1);
+
+			$queryBuilder->setFirstResult($offset);
 			$queryBuilder->setMaxResults($limit);
 		}
 
 		$users = $queryBuilder->getQuery()->execute();
-		$recordsFrom = null;
-		$recordsTo = null;
-
 		$totalPages = $limit ? ceil($total / $limit) : 1;
 
 		return array("users" => $users, "page" => $page, "totalPages" => $totalPages);
+	}
+
+	/**
+	 * Busca todos os usuários que possuem dispositivos
+	 *
+	 *
+	 * @param int $page
+	 *        	Página a ser retornada, somente utilizado quando o limite for informado
+	 * @param int $limit
+	 *        	Limite de resultados a retornar
+	 * @return array Usuários e total de usuários
+	 */
+	public static function getAllDevices($page, $limit) {
+
+		// verifica se a página foi informada, se não foi informada
+		// ou o limite não foi informa usa o padrão,
+		if (!$page) {
+			$page = 1;
+		} else if (!is_int($page) || $page < 1) {
+			throw new \InvalidArgumentException("A página informada é inválida.");
+		}
+
+		// verifica se o limite foi informado e é válido
+		if ($limit && (!is_int($limit) || $limit < 0)) {
+			throw new \InvalidArgumentException("O limite informado é inválido.");
+		}
+
+		global $entityManager;
+
+		// busca o total de usuários
+		$queryBuilder = $entityManager->createQueryBuilder();
+		$queryBuilder = $entityManager->createQueryBuilder();
+		$queryBuilder->select('count(device)')
+						->from(DeviceManager::DEVICE_REPOSITORY, 'device');
+
+		$total = $queryBuilder->getQuery()->getSingleScalarResult();
+
+		// busca os usuários
+		$queryBuilder = $entityManager->createQueryBuilder();
+		$queryBuilder->select('device')
+						->from(DeviceManager::DEVICE_REPOSITORY, 'device')
+						->orderBy('device.userId, device.type', 'ASC');
+
+		if ($limit) {
+			$offset = $limit * ($page - 1);
+
+			$queryBuilder->setFirstResult($offset);
+			$queryBuilder->setMaxResults($limit);
+		}
+
+		$devices = $queryBuilder->getQuery()->execute();
+		$totalPages = $limit ? ceil($total / $limit) : 1;
+
+		return array("devices" => $devices, "page" => $page, "totalPages" => $totalPages);
 	}
 
 	/**
