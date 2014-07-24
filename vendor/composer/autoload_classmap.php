@@ -6,4 +6,6 @@ $vendorDir = dirname(dirname(__FILE__));
 $baseDir = dirname($vendorDir);
 
 return array(
+    'LeLogger' => $vendorDir . '/logentries/logentries/LeLogger.php',
+    'LeLoggerTest' => $vendorDir . '/logentries/logentries/unit_tests/LeLoggerTests.php',
 );

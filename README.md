@@ -28,7 +28,12 @@ A configuração é feita através do arquivo config.php que está na pasta conf
 	
 - Acesso
 	- CROSS_ORIGIN_ENABLED: Indica se permitirá o acesso entre domínios
-	- ACCESS_CONTROL_ALLOW_ORIGIN: Domínios que terão acesso se o acesso entre domínios estiver habilitado.
+	- ACCESS_CONTROL_ALLOW_ORIGIN: Domínios que terão acesso se o acesso entre domínios estiver habilitado
+- Log (logentries.com)
+	- LOG_LEVEL: Nível de log a ser enviado ao servidor do log entries, podendo ser um dos seguintes valores: 
+		- LOG_EMERG, LOG_ALERT, LOG_CRIT, LOG_ERR, LOG_WARNING, LOG_NOTICE, LOG_INFO, LOG_DEBUG
+	- LOG_SSL_ENABLED: indica se deve ou não usar uma conexão segura para envio dos logs
+	- LOG_ENTRIES_TOKEN: token da aplicação no logentries
 
 
 ### API
@@ -69,7 +74,7 @@ Exemplo:
 
 Esse json deve ser codificado em base64 e enviado no cabeçalho de autorização do HTTP (Authorization)	
 	
-	Authorization eyJhcHBJZCI6MSwidGltZXN0YW1wIjoxNDAzNzAxNzk3LCJzaWduYXR1cmUiOiJUcFJhWURoUmY3cjRJYWtjWDhuUU9UYStpY1BRdnMwVEZRVkFmeGlpVVRBPSJ9
+	Authorization: eyJhcHBJZCI6MSwidGltZXN0YW1wIjoxNDAzNzAxNzk3LCJzaWduYXR1cmUiOiJUcFJhWURoUmY3cjRJYWtjWDhuUU9UYStpY1BRdnMwVEZRVkFmeGlpVVRBPSJ9
 	
 Exemplo em Javascrip:
 

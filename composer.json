@@ -2,7 +2,8 @@
 	"require" : {
 		"sly/notification-pusher" : "2.*",
 		"slim/slim" : "2.*",
-		"doctrine/orm" : "2.*"
+		"doctrine/orm" : "2.*",
+		"logentries/logentries" : "1.6"
 	},
 	"name" : "Push-Notifications"
 }
