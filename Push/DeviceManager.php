@@ -240,7 +240,7 @@ class DeviceManager {
 	 */
 	public static function updateDevice($oldToken, $newToken, $userId) {
 		if (!$oldToken || !is_string($oldToken) || !$newToken || !is_string($newToken)
-			|| !$userId || !is_string($userId)) {
+			|| ($userId && !is_string($userId))) {
 			return false;
 		}
 
@@ -248,12 +248,25 @@ class DeviceManager {
 
 		// busca o dispositivo
 		$device = $entityManager->find(DeviceManager::DEVICE_REPOSITORY, array("token" => $oldToken));
+		$deviceNewToken = $entityManager->find(DeviceManager::DEVICE_REPOSITORY, array("token" => $newToken));
 
-		// se existir atualiza-o
+		// se existir
 		if ($device) {
-			$device->setToken($newToken);
-			$device->setUserId($userId);
-			$entityManager->persist($device);
+			//se não existir com o novo token pode atualizar.
+			if ($deviceNewToken == null) {
+				$device->setToken($newToken);
+
+				if ($userId) {
+					$device->setUserId($userId);
+				}
+
+				$entityManager->persist($device);
+			} else {
+				// se existir remove o antigo, pois já foi atualizado
+				$entityManager->remove($device);
+			}
+
+
 			$entityManager->flush();
 			return true;
 		}
