@@ -43,6 +43,8 @@ class IosPushController {
 				$pushManager->add($push);
 				$pushManager->push();
 			} catch (\Exception $e) {
+				global $log;
+				$log->Error($e);
 				$notificationResult->setIosFailed(true);
 				$notificationResult->setIosFailureReason($e->getMessage());
 			}
@@ -71,6 +73,8 @@ class IosPushController {
 				}
 			}
 		} catch (\Exception $e) {
+			global $log;
+			$log->Warn($e);
 			// nada a fazer, irá tentar novamente na próxima vez que enviar notificações
 		}
 	}
