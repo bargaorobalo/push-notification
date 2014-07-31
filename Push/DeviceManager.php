@@ -245,10 +245,15 @@ class DeviceManager {
 		}
 
 		global $entityManager;
+		$deviceNewToken = null;
 
 		// busca o dispositivo
 		$device = $entityManager->find(DeviceManager::DEVICE_REPOSITORY, array("token" => $oldToken));
-		$deviceNewToken = $entityManager->find(DeviceManager::DEVICE_REPOSITORY, array("token" => $newToken));
+
+		// se os tokens forem diferente tenta buscar o dispositivo com o novo também
+		if ($oldToken != $newToken) {
+			$deviceNewToken = $entityManager->find(DeviceManager::DEVICE_REPOSITORY, array("token" => $newToken));
+		}
 
 		// se existir
 		if ($device) {
