@@ -1,5 +1,5 @@
 <?php
-// modo de execução (algumas apis utilizadas necessitam sabe o ambiente sendo utilizado
+// modo de execução (algumas apis utilizadas necessitam saber o ambiente sendo utilizado
 define( 'ENVIRONMENT_DEV', 	'dev');
 define( 'ENVIRONMENT_PROD', 'prod');
 define( 'ENVIRONMENT', 		ENVIRONMENT_PROD);

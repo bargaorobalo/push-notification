@@ -98,16 +98,20 @@ Exemplo em Javascript:
 
 	var secret = "appSecret";
 
-	var obj = {
+	//dados a ser enviados
+	var dataJson = JSON.stringify(data);
+
+	var auth = {
 		appId: 1,
 	    timestamp: Math.floor((new Date).getTime() / 1000),
 		signature: null
 	};
+	
+	//dados a serem assinados
+	var tokenData = auth.appId + secret + auth.timestamp + dataJson;
 
-	var dataJson = JSON.stringify(data);
-	var tokenData = obj.appId + secret + obj.timestamp + dataJson;
-
-	obj.signature = CryptoJS.HmacSHA256(tokenData, secret).toString(CryptoJS.enc.Base64);
+	//obtém a assinatura
+	auth.signature = CryptoJS.HmacSHA256(tokenData, secret).toString(CryptoJS.enc.Base64);
 
 	var token = JSON.stringify(obj);
 	var tokenUtf8 = CryptoJS.enc.Utf8.parse(token);
@@ -124,6 +128,27 @@ Exemplo em Javascript:
 		success: successCallback,
 		error: errorCallback
 	});
+	
+Exemplo em **PHP**:
+
+	...
+	$secret = "appSecret";
+	
+	//dados a ser enviados
+	$dataJson = json_encode($data);
+	
+	$auth = array('appId' => 1, 'timestamp' => time(), 'signature' => null);
+
+	// dados a serem assinados
+	$tokenData = $auth['appId'].$secret.$auth['timestamp'].$dataJson;
+
+	// obtém a assinatura
+	$auth['signature'] = base64_encode(hash_hmac("sha256", $tokenData, $secret, true));
+	$token = json_encode($auth);
+
+	//token
+	$tokenBase64 = base64_encode($token);
+	...
 
 ***Consulta de Usuários que possuem dispositivos cadastrados***
 
