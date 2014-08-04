@@ -76,7 +76,7 @@ Esse json deve ser codificado em base64 e enviado no cabeçalho de autorização
 	
 	Authorization: eyJhcHBJZCI6MSwidGltZXN0YW1wIjoxNDAzNzAxNzk3LCJzaWduYXR1cmUiOiJUcFJhWURoUmY3cjRJYWtjWDhuUU9UYStpY1BRdnMwVEZRVkFmeGlpVVRBPSJ9
 	
-Exemplo em Javascrip:
+Exemplo em Javascript:
 
 	var data = {
 		users : [ {
@@ -87,8 +87,12 @@ Exemplo em Javascrip:
 		}],
 		message : "Mensagem",
 		data : {
-			someData : "data1",
-		    badge: 1
+         "badge" : 2,
+         "custom" : [
+           {
+              "icon_url" : "http://..." 
+           }
+         ] 
 		}
 	}
 
@@ -304,8 +308,12 @@ Exemplo de entrada:
     	],
     	"message" : "mensagem",
 	    "data" : {
-        	 "someData" : "exemplo",
-        	 "badge" : 1
+           "badge" : 2,
+           "custom" : [
+              {
+                 "icon_url" : "http://..." 
+              }
+           ] 
     	}
 	}
 	
