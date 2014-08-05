@@ -310,12 +310,14 @@ function authorize(\Slim\Route $route) {
 		$app = \Slim\Slim::getInstance();
 
 		if ($app->request()->headers("Authorization") == null) {
+			$log->Debug("Cabeçalho de autorização não informado.");
 			unauthorized($log);
 		}
 
 		$authorizationHeader = $app->request()->headers("Authorization");
 
 		if (strpos($authorizationHeader, 'Bearer') !== 0) {
+			$log->Debug("Tipo de autorização não é Bearer.");
 			unauthorized($log);
 		}
 

@@ -22,7 +22,10 @@ class Authorization {
 	 * @return boolean True se estiver autorizada, false caso contrário
 	 */
 	public static function isAuthorized($accessToken, $data) {
+		global $log;
+
 		if (!$accessToken || empty($accessToken)) {
+			$log->Warn("AccessToken não informado.");
 			return false;
 		}
 
@@ -41,9 +44,11 @@ class Authorization {
 			}
 
 			// busca a aplicação pelo identificador
+			$log->Debug("Buscando aplicação de id: ".$tokenObject->appId);
 			$application = ApplicationManager::getApplication($tokenObject->appId);
 
 			if (!$application) {
+				$log->Warn("Aplicação não encontrada.");
 				return false;
 			}
 
@@ -56,6 +61,7 @@ class Authorization {
 			// se as assinaturas baterem então está autorizado
 			return base64_encode($signature) == $tokenObject->signature;
 		} catch (\Exception $e) {
+			$log->Error("Erro ao autenticar.".$e->getMessage());
 			return false;
 		}
 	}
