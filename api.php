@@ -314,6 +314,11 @@ function authorize(\Slim\Route $route) {
 		}
 
 		$authorizationHeader = $app->request()->headers("Authorization");
+
+		if (strpos($authorizationHeader, 'Bearer') !== 0) {
+			unauthorized($log);
+		}
+
 		$method = $app->request()->getMethod();
 		$data = null;
 
@@ -321,8 +326,10 @@ function authorize(\Slim\Route $route) {
 			$data = $app->request()->getBody();
 		}
 
+		$accessToken = trim(preg_replace('/^(?:\s+)?Bearer\s/', '', $authorizationHeader));
+
 		// verifica se o token de acesso foi informado, se foi verifica se está possui acesso
-		if (!isset($authorizationHeader) || !Authorization::isAuthorized($authorizationHeader, $data)) {
+		if (!isset($accessToken) || !Authorization::isAuthorized($accessToken, $data)) {
 			unauthorized($log);
 		}
 	}

@@ -3,6 +3,12 @@ Push Notification
 
 Permite o gerenciamento de dispositivo habilitados a receber notifições por push e o envio de notificações a partir de um servidor utilizando PHP. 
 
+### Pré-requisitos
+
+O servidor apache deve estar configurado para repassar o cabeçalho de autorização para a aplicação.
+
+A aplicação já contém um arquivo .htaccess que configura esse repasse, mas se desejado é possível incluir a mesma configuração no arquivo httpd.conf do apache e remover o arquivo .htaccess.
+
 ### Configuração
 
 A configuração é feita através do arquivo config.php que está na pasta config, é possível configurar os seguintes dados:
@@ -74,7 +80,7 @@ Exemplo:
 
 Esse json deve ser codificado em base64 e enviado no cabeçalho de autorização do HTTP (Authorization)	
 	
-	Authorization: eyJhcHBJZCI6MSwidGltZXN0YW1wIjoxNDAzNzAxNzk3LCJzaWduYXR1cmUiOiJUcFJhWURoUmY3cjRJYWtjWDhuUU9UYStpY1BRdnMwVEZRVkFmeGlpVVRBPSJ9
+	Authorization: Bearer eyJhcHBJZCI6MSwidGltZXN0YW1wIjoxNDAzNzAxNzk3LCJzaWduYXR1cmUiOiJUcFJhWURoUmY3cjRJYWtjWDhuUU9UYStpY1BRdnMwVEZRVkFmeGlpVVRBPSJ9
 	
 Exemplo em Javascript:
 
@@ -121,7 +127,7 @@ Exemplo em Javascript:
 		url: "http://localhost/api.php/notifications",
 		type: 'POST',
 		beforeSend: function (xhr) {
-			xhr.setRequestHeader('Authorization', tokenBase64);
+			xhr.setRequestHeader('Authorization', 'Bearer ' + tokenBase64);
 		},
 		data: dataJson,
 		contentType: 'application/json',
