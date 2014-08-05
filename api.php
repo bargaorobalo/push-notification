@@ -308,13 +308,12 @@ function authorize(\Slim\Route $route) {
 		$log->Debug("Autorizando aplicação.");
 
 		$app = \Slim\Slim::getInstance();
-		$headers = apache_request_headers();
 
-		if (!isset($headers["Authorization"])) {
+		if ($app->request()->headers("Authorization") == null) {
 			unauthorized($log);
 		}
 
-		$authorizationHeader = $headers["Authorization"];
+		$authorizationHeader = $app->request()->headers("Authorization");
 		$method = $app->request()->getMethod();
 		$data = null;
 
