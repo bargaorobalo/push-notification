@@ -21,6 +21,7 @@ define( 'IOS_CERTIFICATE_PASSWORD', 'unisuam-alunos');
 
 // Autorização
 define( 'AUTHORIZATION_ENABLED', true);
+define( 'AUTHORIZATION_HEADER', 'UnisuamAuth');
 
 // Acesso
 define( 'CROSS_ORIGIN_ENABLED', true);
