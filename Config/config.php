@@ -13,7 +13,7 @@ define( 'DB_HOST',     	'localhost' );
 define( 'DB_PORT',  	'5432' );
 
 // push - Android
-define( 'ANDROID_API_KEY', 			"AIzaSyABnEeaeeQXmAkUm795SFN16Z6_hrTFbho");
+define( 'ANDROID_API_KEY', "AIzaSyABnEeaeeQXmAkUm795SFN16Z6_hrTFbho");
 
 // push - IOS
 define( 'IOS_CERTIFICATE_PATH', 	'unisuam/UnisuamAlunosCK.pem');

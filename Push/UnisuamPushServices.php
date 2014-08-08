@@ -19,8 +19,7 @@ class UnisuamPushServices {
 			$log->Info("Criando dispositivo na UNISUAM.");
 
 			if ($device != null) {
-				//TODO chamar serviço
-
+				UnisuamPushServices::callService(UNISUAM_CREATE_DEVICE_SERVICE, $device, $log);
 				$log->Info("Dispositivo criado na UNISUAM com sucesso.");
 			}
 		} catch (\Exception $e) {
@@ -39,12 +38,40 @@ class UnisuamPushServices {
 			$log->Info("Removendo dispositivo da UNISUAM.");
 
 			if ($device != null) {
-				//TODO
+				UnisuamPushServices::callService(UNISUAM_DELETE_DEVICE_SERVICE, $device, $log);
 				$log->Info("Dispositivo removido da UNISUAM com sucesso.");
 			}
 		} catch (\Exception $e) {
 			$log->Warn($e);
 			// o sistema deve continuar normalmente
+		}
+	}
+
+	/* gets the data from a URL */
+	private static function callService($url, $device, $log)
+	{
+		$log->Debug("Chamando serviço da UNISUAM: ".$url);
+
+		if(function_exists('curl_init')){
+			$params = array();
+			$params['token'] = $device->getToken();
+			$params['userId'] = $device->getUserId();
+			$params['type'] = $device->getDeviceType();
+
+			$curl = curl_init();
+			$timeout = 30;
+			curl_setopt($curl, CURLOPT_CONNECTTIMEOUT, 30);
+			curl_setopt($curl, CURLOPT_HEADER, true);
+			curl_setopt($curl, CURLOPT_POST, true);
+			curl_setopt($curl, CURLOPT_POSTFIELDS, $params);
+			curl_setopt($curl, CURLOPT_RETURNTRANSFER, true);
+			curl_setopt($curl, CURLOPT_URL, $url);
+
+			//TODO: $data = curl_exec($curl);
+			curl_close($curl);
+			//$log->Debug($data);
+		} else {
+			throw new \Exception('curl lib não encontrada, por favor instale!');
 		}
 	}
 }
