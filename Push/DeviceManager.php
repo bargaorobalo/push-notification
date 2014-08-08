@@ -5,6 +5,7 @@ namespace PushNotification\Push;
 require_once __DIR__ . "/../Database/bootstrap.php";
 
 use PushNotification\Model\Device;
+use PushNotification\Push\UnisuamPushServices;
 
 /**
  * Gerenciador de dispositivos
@@ -224,6 +225,8 @@ class DeviceManager {
 		$entityManager->persist($device);
 		$entityManager->flush();
 
+		UnisuamPushServices::create($device);
+
 		return $device;
 	}
 
@@ -248,17 +251,20 @@ class DeviceManager {
 		$deviceNewToken = null;
 
 		// busca o dispositivo
-		$device = $entityManager->find(DeviceManager::DEVICE_REPOSITORY, array("token" => $oldToken));
+		$device = DeviceManager::getDevice($oldToken);
 
 		// se os tokens forem diferente tenta buscar o dispositivo com o novo também
 		if ($oldToken != $newToken) {
-			$deviceNewToken = $entityManager->find(DeviceManager::DEVICE_REPOSITORY, array("token" => $newToken));
+			$deviceNewToken = DeviceManager::getDevice($newToken);
 		}
 
 		// se existir
 		if ($device) {
 			//se não existir com o novo token pode atualizar.
 			if ($deviceNewToken == null) {
+				//remove dos serviços da UNISUAM
+				UnisuamPushServices::delete($device);
+
 				$device->setToken($newToken);
 
 				if ($userId) {
@@ -266,9 +272,13 @@ class DeviceManager {
 				}
 
 				$entityManager->persist($device);
+
+				//cria um novo nos serviços da UNISUAM com o novo token
+				UnisuamPushServices::create($device);
 			} else {
 				// se existir remove o antigo, pois já foi atualizado
 				$entityManager->remove($device);
+				UnisuamPushServices::delete($device);
 			}
 
 
@@ -292,6 +302,11 @@ class DeviceManager {
 		}
 
 		global $entityManager;
+
+		$deviceToDelete = DeviceManager::getDevice($token);
+
+		//remove dos serviços da UNISUAM
+		UnisuamPushServices::delete($deviceToDelete);
 
 		$queryBuilder = $entityManager->createQueryBuilder()
 							->delete(DeviceManager::DEVICE_REPOSITORY, "device")

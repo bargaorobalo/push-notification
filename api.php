@@ -9,6 +9,7 @@ require_once "Model/HttpStatusCode.php";
 require_once "Model/NotificationResponse.php";
 require_once "Push/DeviceManager.php";
 require_once "Push/PushController.php";
+require_once "Push/UnisuamPushServices.php";
 require_once "Authorization/Authorization.php";
 require_once "vendor/logentries/logentries/logentries.php";
 
