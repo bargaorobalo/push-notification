@@ -54,9 +54,10 @@ class UnisuamPushServices {
 
 		if(function_exists('curl_init')){
 			$params = array();
-			$params['token'] = $device->getToken();
-			$params['userId'] = $device->getUserId();
-			$params['type'] = $device->getDeviceType();
+			$params['identificador_token'] = $device->getToken();
+			$params['unique_id'] = $device->getUserId();
+			$params['push_tipo_dispositivo_id'] = $device->getDeviceType();
+			$params['token'] = UNISUAM_APP_TOKEN;
 
 			$curl = curl_init();
 			$timeout = 30;
@@ -67,9 +68,9 @@ class UnisuamPushServices {
 			curl_setopt($curl, CURLOPT_RETURNTRANSFER, true);
 			curl_setopt($curl, CURLOPT_URL, $url);
 
-			//TODO: $data = curl_exec($curl);
+			$data = curl_exec($curl);
 			curl_close($curl);
-			//$log->Debug($data);
+			$log->Info($data);
 		} else {
 			throw new \Exception('curl lib não encontrada, por favor instale!');
 		}
