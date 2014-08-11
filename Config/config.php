@@ -35,4 +35,4 @@ define( 'LOG_ENTRIES_TOKEN', '0774c510-01d4-48f5-8fe0-12bedde18bbe');
 //UNISUAM
 define( 'UNISUAM_CREATE_DEVICE_SERVICE', "http://apicms-dev.unisuam.edu.br/api/cms-push");
 define( 'UNISUAM_DELETE_DEVICE_SERVICE', "http://apicms-dev.unisuam.edu.br/api/cms-push/desativar");
-define( 'UNISUAM_APP_TOKEN', "581d82c8000c70ea2029d3a1297a3d41");
+define( 'UNISUAM_APP_TOKEN', "");
