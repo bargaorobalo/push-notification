@@ -25,7 +25,7 @@ A configuração é feita através do arquivo config.php que está na pasta conf
 	- DB_PORT: porta do servidor do banco de dados
 	
 - Push
-	- ANDROID_API_KEY: chave que permite o envio de push ao android
+	- ANDROID_API_KEY: chave que permite o envio de push ao android, caso não tenha uma acesse o [manual](https://github.com/andrecrispim/push-notification/blob/master/docs/gcm_manual.md) sobre como criar uma chave de acesso para envio de notificações usando o *Google Cloud Messaging for Android*.
 	- IOS_CERTIFICATE_PATH: caminho para o arquivo do certificado que permite o envio de push ao IOS
 	- IOS_CERTIFICATE_PASSWORD: senha para o acesso ao certificado
 	
