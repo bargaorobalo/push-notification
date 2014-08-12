@@ -27,7 +27,7 @@ Para poder enviar notificações para dispositivos Android é necessário criar 
 	
 	![Image](https://raw.githubusercontent.com/andrecrispim/push-notification/master/docs/resources/push-step-5.png)
 	
-	* Na janela seguinte irá se exibido um campo para informar os IPs dos servidores que podem enviar requisições utilizando a chave sendo criada. Se desejar é possível deixar o campo em banco, o que significará que qualquer servidor poderá utilizar a chave para enviar requisições.
+	* Na janela seguinte irá ser exibido um campo para informar os IPs dos servidores que podem enviar requisições utilizando a chave sendo criada. Se desejar é possível deixar o campo em banco, o que significará que qualquer servidor poderá utilizar a chave para enviar requisições.
 	* Clique em *Create*
 	
 	![Image](https://raw.githubusercontent.com/andrecrispim/push-notification/master/docs/resources/push-step-3.png)
@@ -37,7 +37,7 @@ Para poder enviar notificações para dispositivos Android é necessário criar 
 	![Image](https://raw.githubusercontent.com/andrecrispim/push-notification/master/docs/resources/push-step-4.png)
 	
 * Configure a aplicacão Android
-	* A aplicação android necessitará do número do projeto para ser registrar no servidores do google
+	* A aplicação android necessitará do número do projeto para efetua o registro no servidores do google
 	* Obtenha o número de acesso na opção *Monitoring -> Overview*, ele se encontra na parte superior da tela ao lado do *Project Id* com o nome *Project Number*
 	
 	![Image](https://raw.githubusercontent.com/andrecrispim/push-notification/master/docs/resources/push-step-6.png)
