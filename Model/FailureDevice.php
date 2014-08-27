@@ -24,13 +24,18 @@ class FailureDevice extends Device {
 	 *        	Identificador de push do dispositivo para recebimento de notificações
 	 * @param int $type
 	 *        	Tipo do dispositivo
-	 * @param string $userId
-	 *        	Identificador do usuário
 	 * @param string $reason
 	 *        	Motivo da falha
 	 */
-	public function __construct($token, $type, $userId, $reason) {
-		parent::__construct($token, $type, $userId);
+	public function __construct($token, $type, $reason) {
+		parent::__construct($token, $type, null);
 		$this->reason = $reason;
+	}
+
+	/**
+	 * Define o que será serializado ao codificar um JSON
+	 */
+	public function JsonSerialize() {
+		return get_object_vars($this);
 	}
 }

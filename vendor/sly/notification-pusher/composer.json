@@ -33,7 +33,7 @@
     },
     "autoload": {
         "psr-0": {
-            "Sly": ["src/"]
+            "Sly": "src/"
         }
     }
 }

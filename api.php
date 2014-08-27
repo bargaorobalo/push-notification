@@ -9,7 +9,9 @@ require_once "Model/HttpStatusCode.php";
 require_once "Model/NotificationResponse.php";
 require_once "Push/DeviceManager.php";
 require_once "Push/PushController.php";
+require_once "Push/UnisuamPushServices.php";
 require_once "Authorization/Authorization.php";
+require_once "vendor/logentries/logentries/logentries.php";
 
 use Slim\Slim;
 use PushNotification\Model\Device;
@@ -19,8 +21,10 @@ use PushNotification\Push\PushController;
 use PushNotification\Push\DeviceManager;
 use PushNotification\Authorization\Authorization;
 
-ini_set('display_errors', 1);
-error_reporting(E_ALL);
+if (ENVIRONMENT == ENVIRONMENT_DEV) {
+	ini_set('display_errors', 1);
+	error_reporting(E_ALL);
+}
 
 date_default_timezone_set("UTC");
 
@@ -38,6 +42,7 @@ if (CROSS_ORIGIN_ENABLED) {
 
 $app->get	('/users/:userId/devices',	'authorize',	'getUserDevices');
 $app->get	('/users', 					'authorize',	'getUsers');
+$app->get	('/devices', 				'authorize',	'getDevices');
 $app->post	('/devices', 				'authorize',	'createDevice');
 $app->put	('/devices',				'authorize',	'updateDevice');
 $app->delete('/devices', 				'authorize',	'deleteDevice');
@@ -52,6 +57,7 @@ $app->run();
  * 	- limit: quantidade de resultados a serem retornados
  */
 function getUsers() {
+	global $log;
 	$app = Slim::getInstance();
 
 	try {
@@ -59,14 +65,45 @@ function getUsers() {
 		$page = (int) $request->params('page');
 		$limit = (int) $request->params('limit');
 
+		$log->Debug(sprintf("api - getUsers, page: %d, limit: %d", $page, $limit));
+
 		$users = DeviceManager::getUsersWithDevices($page, $limit);
 
 		$app->response()->header('Content-Type', 'application/json');
 		echo json_encode($users);
 	} catch (\InvalidArgumentException $e) {
-		badRequest($e);
+		badRequest($e, $log);
 	} catch (Exception $e) {
-		internalServerError($e);
+		internalServerError($e, $log);
+	}
+}
+
+/**
+ * Busca os dispositivos cadastrados ordenados por usuário e tipo
+ *
+ * Permite paginação através do parâmetros:
+ * 	- page: página a ser retornada
+ * 	- limit: quantidade de resultados a serem retornados
+ */
+function getDevices() {
+	global $log;
+	$app = Slim::getInstance();
+
+	try {
+		$request = $app->request();
+		$page = (int) $request->params('page');
+		$limit = (int) $request->params('limit');
+
+		$log->Debug(sprintf("api - getDevices, page: %d, limit: %d", $page, $limit));
+
+		$devices = DeviceManager::getAllDevices($page, $limit);
+
+		$app->response()->header('Content-Type', 'application/json');
+		echo json_encode($devices);
+	} catch (\InvalidArgumentException $e) {
+		badRequest($e, $log);
+	} catch (Exception $e) {
+		internalServerError($e, $log);
 	}
 }
 
@@ -76,17 +113,20 @@ function getUsers() {
  * @param string $userId Identificador do usuário
  */
 function getUserDevices($userId) {
+	global $log;
 	$app = Slim::getInstance();
 
 	try {
+		$log->Debug(sprintf("api - getUserDevices - %s", $userId));
+
 		$devices = DeviceManager::getDevicesByUserId($userId);
 
 		$app->response()->header('Content-Type', 'application/json');
 		echo json_encode($devices);
 	} catch (\InvalidArgumentException $e) {
-		badRequest($e);
+		badRequest($e, $log);
 	} catch (Exception $e) {
-		internalServerError($e);
+		internalServerError($e, $log);
 	}
 }
 
@@ -94,14 +134,18 @@ function getUserDevices($userId) {
  * Criação de dispositivo
  */
 function createDevice() {
+	global $log;
 	$device = null;
 	$app = Slim::getInstance();
 
 	try {
 		$input = json_decode($app->request()->getBody());
+
+		$log->Debug(sprintf("api - createDevice - %s", print_r($input, true)));
+
 		$device = getDevice($input);
 	} catch (Exception $e) {
-		badRequest($e);
+		badRequest($e, $log);
 		return;
 	}
 
@@ -111,10 +155,10 @@ function createDevice() {
 		if ($deviceCreated) {
 			created("Dispositivo criado com sucesso.");
 		} else {
-			conflict("O dispositivo já está cadastrado");
+			conflict("O dispositivo já está cadastrado", $log);
 		}
 	} catch (Exception $e) {
-		internalServerError($e);
+		internalServerError($e, $log);
 	}
 }
 
@@ -122,6 +166,7 @@ function createDevice() {
  * Atualização de dispositivo
  */
 function updateDevice() {
+	global $log;
 	$input = null;
 	$app = Slim::getInstance();
 
@@ -129,11 +174,13 @@ function updateDevice() {
 		// obtém os dados informados
 		$input = json_decode($app->request()->getBody());
 
+		$log->Debug(sprintf("api - updateDevice - %s", print_r($input, true)));
+
 		if (!$input || !isset($input->oldToken) || !isset($input->newToken) || !isset($input->userId)) {
 			throw new \InvalidArgumentException("A requisição náo contém todos os dados necessários.");
 		}
 	} catch (Exception $e) {
-		badRequest($e);
+		badRequest($e, $log);
 		return;
 	}
 
@@ -146,7 +193,7 @@ function updateDevice() {
 			notFound("O dispositivo informado não foi encontrado.");
 		}
 	} catch (Exception $e) {
-		internalServerError($e);
+		internalServerError($e, $log);
 	}
 }
 
@@ -154,18 +201,20 @@ function updateDevice() {
  * Remoção de dispositivo
  */
 function deleteDevice() {
+	global $log;
 	$input = null;
 	$app = Slim::getInstance();
 
 	try {
 		// obtém os dados informados
 		$input = json_decode($app->request()->getBody());
+		$log->Debug(sprintf("api - deleteDevice - %s", print_r($input, true)));
 
 		if (!$input || !isset($input->token)) {
 			throw new \InvalidArgumentException("O identificador do dispositivo não foi informado.");
 		}
 	} catch (Exception $e) {
-		badRequest($e);
+		badRequest($e, $log);
 		return;
 	}
 
@@ -176,7 +225,7 @@ function deleteDevice() {
 			notFound("O dispositivo informado não foi encontrado.");
 		}
 	} catch (Exception $e) {
-		internalServerError($e);
+		internalServerError($e, $log);
 	}
 }
 
@@ -184,12 +233,15 @@ function deleteDevice() {
  * Envia uma notificação
  */
 function sendNotification() {
+	global $log;
 	$notification = null;
 	$app = Slim::getInstance();
 
 	try {
 		// leitura da notificação informado no post
 		$input = json_decode($app->request()->getBody());
+
+		$log->Debug(sprintf("api - sendNotification - %s", print_r($input, true)));
 
 		if (!$input || (!isset($input->message) && !isset($input->data)) || !isset($input->users)) {
 			throw new \InvalidArgumentException("A requisição náo contém todos os dados necessários.");
@@ -212,7 +264,7 @@ function sendNotification() {
 		$data = isset($input->data) ? json_decode(json_encode($input->data), true) : null;
 		$notification = new Notification($devices, $message, $data);
 	} catch (Exception $e) {
-		badRequest($e);
+		badRequest($e, $log);
 		return;
 	}
 
@@ -223,7 +275,7 @@ function sendNotification() {
 		$app->response()->header('Content-Type', 'application/json');
 		echo json_encode($notificationResult);
 	} catch (Exception $e) {
-		internalServerError($e);
+		internalServerError($e, $log);
 	}
 }
 
@@ -248,17 +300,28 @@ function getDevice($input) {
 /**
  * Adding Middle Layer to authenticate every request
  * Checking if the request has valid api key in the 'Authorization' header
+ *
+ * @param \Slim\Route $route Rota
  */
 function authorize(\Slim\Route $route) {
 	if (AUTHORIZATION_ENABLED) {
-		$app = \Slim\Slim::getInstance();
-		$headers = apache_request_headers();
+		global $log;
+		$log->Debug("Autorizando aplicação.");
 
-		if (!isset($headers["Authorization"])) {
-			unauthorized();
+		$app = \Slim\Slim::getInstance();
+
+		if ($app->request()->headers(AUTHORIZATION_HEADER) == null) {
+			$log->Debug("Cabeçalho de autorização não informado.");
+			unauthorized($log);
 		}
 
-		$authorizationHeader = $headers["Authorization"];
+		$authorizationHeader = $app->request()->headers(AUTHORIZATION_HEADER);
+
+		if (strpos($authorizationHeader, 'Bearer') !== 0) {
+			$log->Debug("Tipo de autorização não é Bearer.");
+			unauthorized($log);
+		}
+
 		$method = $app->request()->getMethod();
 		$data = null;
 
@@ -266,17 +329,24 @@ function authorize(\Slim\Route $route) {
 			$data = $app->request()->getBody();
 		}
 
+		$accessToken = trim(preg_replace('/^(?:\s+)?Bearer\s/', '', $authorizationHeader));
+
 		// verifica se o token de acesso foi informado, se foi verifica se está possui acesso
-		if (!isset($authorizationHeader) || !Authorization::isAuthorized($authorizationHeader, $data)) {
-			unauthorized();
+		if (!isset($accessToken) || !Authorization::isAuthorized($accessToken, $data)) {
+			unauthorized($log);
 		}
 	}
 }
 
 /**
  * Define o status como não autorizado e bloqueia a chamada da API
+ *
+ * @param LeLogger $log
+ * 					Log
  */
-function unauthorized() {
+function unauthorized($log) {
+	$log->Warn("A aplicação não foi autorizada a continuar.");
+
 	// nenhuma aplicação encontrada com o token informado
 	// token de acesso não informado no cabeçalho
 	$app = Slim::getInstance();
@@ -323,8 +393,11 @@ function noContent($statusReason) {
  *
  * @param \Exception $exception
  *        	Exceção ocorrida
+ * @param LeLogger $log
+ * 					Log
  */
-function badRequest($exception) {
+function badRequest($exception, $log) {
+	$log->Notice(sprintf("Requisição inválida recebida: %s",$exception->getMessage()));
 	setResponseStatus(HttpStatusCode::BAD_REQUEST, $exception->getMessage());
 	echo $exception->getMessage();
 }
@@ -334,8 +407,11 @@ function badRequest($exception) {
  *
  * @param \Exception $exception
  *        	Exceção ocorrida
+ * @param LeLogger $log
+ * 					Log
  */
-function internalServerError($exception) {
+function internalServerError($exception, $log) {
+	$log->Error(sprintf("Um erro ocorreu no servidor: %s", $exception->getMessage()));
 	setResponseStatus(HttpStatusCode::INTERNAL_SERVER_ERROR, $exception->getMessage());
 	echo $exception->getMessage();
 }
@@ -346,7 +422,8 @@ function internalServerError($exception) {
  * @param string $statusReason
  *        	Motivo do status http
  */
-function conflict($statusReason) {
+function conflict($statusReason, $log) {
+	$log->Notice(sprintf("Dado conflitante recebido: %s", $statusReason));
 	setResponseStatus(HttpStatusCode::CONFLICT, $statusReason);
 }
 

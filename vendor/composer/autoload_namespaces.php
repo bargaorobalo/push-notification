@@ -13,6 +13,7 @@ return array(
     'Zend\\Json\\' => array($vendorDir . '/zendframework/zend-json'),
     'Zend\\Http\\' => array($vendorDir . '/zendframework/zend-http'),
     'Zend\\Escaper\\' => array($vendorDir . '/zendframework/zend-escaper'),
+    'ZendService\\Apple\\Exception\\' => array($vendorDir . '/zendframework/zendservice-apple-apns/library'),
     'ZendService\\Apple\\Apns\\' => array($vendorDir . '/zendframework/zendservice-apple-apns/library'),
     'ZendService' => array($vendorDir . '/zendframework/zendservice-google-gcm/library'),
     'Symfony\\Component\\Process\\' => array($vendorDir . '/symfony/process'),

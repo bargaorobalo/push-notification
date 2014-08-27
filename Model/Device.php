@@ -23,17 +23,17 @@ class Device implements \JsonSerializable {
 	 * @Id
 	 * @Column(type="text")
 	 */
-	private $token;
+	protected $token;
 
 	/**
 	 * @Column(type="smallint")
 	 */
-	private $type;
+	protected $type;
 
 	/**
 	 * @Column(name="user_id", type="string")
 	 */
-	private $userId;
+	protected $userId;
 
 	/**
 	 * Tipo do dispositivo

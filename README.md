@@ -3,6 +3,12 @@ Push Notification
 
 Permite o gerenciamento de dispositivo habilitados a receber notifições por push e o envio de notificações a partir de um servidor utilizando PHP. 
 
+### Pré-requisitos
+
+O servidor apache deve estar configurado para repassar o cabeçalho de autorização para a aplicação.
+
+A aplicação já contém um arquivo .htaccess que configura esse repasse, mas se desejado é possível incluir a mesma configuração no arquivo httpd.conf do apache e remover o arquivo .htaccess.
+
 ### Configuração
 
 A configuração é feita através do arquivo config.php que está na pasta config, é possível configurar os seguintes dados:
@@ -19,8 +25,8 @@ A configuração é feita através do arquivo config.php que está na pasta conf
 	- DB_PORT: porta do servidor do banco de dados
 	
 - Push
-	- ANDROID_API_KEY: chave que permite o envio de push ao android
-	- IOS_CERTIFICATE_PATH: caminho para o arquivo do certificado que permite o envio de push ao IOS
+	- ANDROID_API_KEY: chave que permite o envio de push ao android, caso não tenha uma acesse o [manual](https://github.com/andrecrispim/push-notification/blob/master/docs/gcm_manual.md) sobre como criar uma chave de acesso para envio de notificações usando o *Google Cloud Messaging for Android*.
+	- IOS_CERTIFICATE_PATH: caminho para o arquivo do certificado que permite o envio de push ao IOS ([manual de criação de certificado](https://github.com/CWISoftware/UNISUAM-Mobile/blob/master/docs/ios_certificates.md))
 	- IOS_CERTIFICATE_PASSWORD: senha para o acesso ao certificado
 	
 - Autorização:
@@ -28,7 +34,12 @@ A configuração é feita através do arquivo config.php que está na pasta conf
 	
 - Acesso
 	- CROSS_ORIGIN_ENABLED: Indica se permitirá o acesso entre domínios
-	- ACCESS_CONTROL_ALLOW_ORIGIN: Domínios que terão acesso se o acesso entre domínios estiver habilitado.
+	- ACCESS_CONTROL_ALLOW_ORIGIN: Domínios que terão acesso se o acesso entre domínios estiver habilitado
+- Log (logentries.com)
+	- LOG_LEVEL: Nível de log a ser enviado ao servidor do log entries, podendo ser um dos seguintes valores: 
+		- LOG_EMERG, LOG_ALERT, LOG_CRIT, LOG_ERR, LOG_WARNING, LOG_NOTICE, LOG_INFO, LOG_DEBUG
+	- LOG_SSL_ENABLED: indica se deve ou não usar uma conexão segura para envio dos logs
+	- LOG_ENTRIES_TOKEN: token da aplicação no logentries
 
 
 ### API
@@ -69,9 +80,9 @@ Exemplo:
 
 Esse json deve ser codificado em base64 e enviado no cabeçalho de autorização do HTTP (Authorization)	
 	
-	Authorization eyJhcHBJZCI6MSwidGltZXN0YW1wIjoxNDAzNzAxNzk3LCJzaWduYXR1cmUiOiJUcFJhWURoUmY3cjRJYWtjWDhuUU9UYStpY1BRdnMwVEZRVkFmeGlpVVRBPSJ9
+	Authorization: Bearer eyJhcHBJZCI6MSwidGltZXN0YW1wIjoxNDAzNzAxNzk3LCJzaWduYXR1cmUiOiJUcFJhWURoUmY3cjRJYWtjWDhuUU9UYStpY1BRdnMwVEZRVkFmeGlpVVRBPSJ9
 	
-Exemplo em Javascrip:
+Exemplo em Javascript:
 
 	var data = {
 		users : [ {
@@ -82,23 +93,31 @@ Exemplo em Javascrip:
 		}],
 		message : "Mensagem",
 		data : {
-			someData : "data1",
-		    badge: 1
+         "badge" : 2,
+         "custom" : [
+           {
+              "icon_url" : "http://..." 
+           }
+         ] 
 		}
 	}
 
 	var secret = "appSecret";
 
-	var obj = {
+	//dados a ser enviados
+	var dataJson = JSON.stringify(data);
+
+	var auth = {
 		appId: 1,
 	    timestamp: Math.floor((new Date).getTime() / 1000),
 		signature: null
 	};
+	
+	//dados a serem assinados
+	var tokenData = auth.appId + secret + auth.timestamp + dataJson;
 
-	var dataJson = JSON.stringify(data);
-	var tokenData = obj.appId + secret + obj.timestamp + dataJson;
-
-	obj.signature = CryptoJS.HmacSHA256(tokenData, secret).toString(CryptoJS.enc.Base64);
+	//obtém a assinatura
+	auth.signature = CryptoJS.HmacSHA256(tokenData, secret).toString(CryptoJS.enc.Base64);
 
 	var token = JSON.stringify(obj);
 	var tokenUtf8 = CryptoJS.enc.Utf8.parse(token);
@@ -108,13 +127,34 @@ Exemplo em Javascrip:
 		url: "http://localhost/api.php/notifications",
 		type: 'POST',
 		beforeSend: function (xhr) {
-			xhr.setRequestHeader('Authorization', tokenBase64);
+			xhr.setRequestHeader('Authorization', 'Bearer ' + tokenBase64);
 		},
 		data: dataJson,
 		contentType: 'application/json',
 		success: successCallback,
 		error: errorCallback
 	});
+	
+Exemplo em **PHP**:
+
+	...
+	$secret = "appSecret";
+	
+	//dados a ser enviados
+	$dataJson = json_encode($data);
+	
+	$auth = array('appId' => 1, 'timestamp' => time(), 'signature' => null);
+
+	// dados a serem assinados
+	$tokenData = $auth['appId'].$secret.$auth['timestamp'].$dataJson;
+
+	// obtém a assinatura
+	$auth['signature'] = base64_encode(hash_hmac("sha256", $tokenData, $secret, true));
+	$token = json_encode($auth);
+
+	//token
+	$tokenBase64 = base64_encode($token);
+	...
 
 ***Consulta de Usuários que possuem dispositivos cadastrados***
 
@@ -147,6 +187,41 @@ Exemplo:
 		"totalPages" : 3
 	} 
 
+***Consulta de dispositivos cadastrados***
+
+- .../api.php/devices?page=1&limit=2
+- Método Http: Get
+- Parâmetros (opcionais)
+
+	- page : página a ser retornada
+	- limit: quantidade máxima de resultados a retornar
+	 
+- Retorno (HttpStatus e Json contendo os dispositivos, a página atual e o total de páginas): 
+
+	- 200 (OK): Se consultar com sucesso
+	- 400 (Bad Request): Se a requisição for inválida
+	- 401 (Unauthorized): Se o acesso for negado
+	- 500 (Internal Server Error): Se ocorrer erro no servidor
+	
+Exemplo:
+
+	{
+	   "devices" : [
+			{		
+				"token" : "token2",
+				"type" : 1,
+				"userId" : "11111111111"
+			},
+			{	
+				"token" : "token3",
+				"type" : 2,
+				"userId" : "11111111111"
+			}
+		],
+		"page" : 1,
+		"totalPages" : 5
+	}
+	
 ***Consulta de Dispositivos de um Usuário:***
 
 - .../api.php/users/{:userId}/devices
@@ -264,8 +339,12 @@ Exemplo de entrada:
     	],
     	"message" : "mensagem",
 	    "data" : {
-        	 "someData" : "exemplo",
-        	 "badge" : 1
+           "badge" : 2,
+           "custom" : [
+              {
+                 "icon_url" : "http://..." 
+              }
+           ] 
     	}
 	}
 	

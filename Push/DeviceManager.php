@@ -5,6 +5,7 @@ namespace PushNotification\Push;
 require_once __DIR__ . "/../Database/bootstrap.php";
 
 use PushNotification\Model\Device;
+use PushNotification\Push\UnisuamPushServices;
 
 /**
  * Gerenciador de dispositivos
@@ -56,7 +57,7 @@ class DeviceManager {
 
 		// verifica se a página foi informada, se não foi informada
 		// ou o limite não foi informa usa o padrão,
-		if (!$page || !$limit) {
+		if (!$page) {
 			$page = 1;
 		} else if (!is_int($page) || $page < 1) {
 			throw new \InvalidArgumentException("A página informada é inválida.");
@@ -68,8 +69,6 @@ class DeviceManager {
 		}
 
 		global $entityManager;
-
-		$offset = $limit ? $limit * ($page - 1) : ($page - 1);
 
 		// busca o total de usuários
 		$queryBuilder = $entityManager->createQueryBuilder();
@@ -83,20 +82,73 @@ class DeviceManager {
 		$queryBuilder = $entityManager->createQueryBuilder();
 		$queryBuilder->select('device.userId')
 						->from(DeviceManager::DEVICE_REPOSITORY, 'device')
-						->distinct()
-						->setFirstResult($offset);
+						->distinct();
 
 		if ($limit) {
+			$offset = $limit * ($page - 1);
+
+			$queryBuilder->setFirstResult($offset);
 			$queryBuilder->setMaxResults($limit);
 		}
 
 		$users = $queryBuilder->getQuery()->execute();
-		$recordsFrom = null;
-		$recordsTo = null;
-
 		$totalPages = $limit ? ceil($total / $limit) : 1;
 
 		return array("users" => $users, "page" => $page, "totalPages" => $totalPages);
+	}
+
+	/**
+	 * Busca todos os usuários que possuem dispositivos
+	 *
+	 *
+	 * @param int $page
+	 *        	Página a ser retornada, somente utilizado quando o limite for informado
+	 * @param int $limit
+	 *        	Limite de resultados a retornar
+	 * @return array Usuários e total de usuários
+	 */
+	public static function getAllDevices($page, $limit) {
+
+		// verifica se a página foi informada, se não foi informada
+		// ou o limite não foi informa usa o padrão,
+		if (!$page) {
+			$page = 1;
+		} else if (!is_int($page) || $page < 1) {
+			throw new \InvalidArgumentException("A página informada é inválida.");
+		}
+
+		// verifica se o limite foi informado e é válido
+		if ($limit && (!is_int($limit) || $limit < 0)) {
+			throw new \InvalidArgumentException("O limite informado é inválido.");
+		}
+
+		global $entityManager;
+
+		// busca o total de usuários
+		$queryBuilder = $entityManager->createQueryBuilder();
+		$queryBuilder = $entityManager->createQueryBuilder();
+		$queryBuilder->select('count(device)')
+						->from(DeviceManager::DEVICE_REPOSITORY, 'device');
+
+		$total = $queryBuilder->getQuery()->getSingleScalarResult();
+
+		// busca os usuários
+		$queryBuilder = $entityManager->createQueryBuilder();
+		$queryBuilder->select('device')
+						->from(DeviceManager::DEVICE_REPOSITORY, 'device')
+						->orderBy('device.userId, device.type', 'ASC');
+
+		if ($limit) {
+			$offset = $limit * ($page - 1);
+
+			$queryBuilder->setFirstResult($offset);
+			$queryBuilder->setMaxResults($limit);
+		}
+
+		$devices = $queryBuilder->getQuery()->execute();
+		$totalPages = $limit ? ceil($total / $limit) : 1;
+
+		return array("devices" => $devices, "page" => $page, "totalPages" => $totalPages);
 	}
 
 	/**
@@ -173,6 +225,8 @@ class DeviceManager {
 		$entityManager->persist($device);
 		$entityManager->flush();
 
+		UnisuamPushServices::create($device);
+
 		return $device;
 	}
 
@@ -189,20 +243,45 @@ class DeviceManager {
 	 */
 	public static function updateDevice($oldToken, $newToken, $userId) {
 		if (!$oldToken || !is_string($oldToken) || !$newToken || !is_string($newToken)
-			|| !$userId || !is_string($userId)) {
+			|| ($userId && !is_string($userId))) {
 			return false;
 		}
 
 		global $entityManager;
+		$deviceNewToken = null;
 
 		// busca o dispositivo
-		$device = $entityManager->find(DeviceManager::DEVICE_REPOSITORY, array("token" => $oldToken));
+		$device = DeviceManager::getDevice($oldToken);
 
-		// se existir atualiza-o
+		// se os tokens forem diferente tenta buscar o dispositivo com o novo também
+		if ($oldToken != $newToken) {
+			$deviceNewToken = DeviceManager::getDevice($newToken);
+		}
+
+		// se existir
 		if ($device) {
-			$device->setToken($newToken);
-			$device->setUserId($userId);
-			$entityManager->persist($device);
+			//se não existir com o novo token pode atualizar.
+			if ($deviceNewToken == null) {
+				//remove dos serviços da UNISUAM
+				UnisuamPushServices::delete($device);
+
+				$device->setToken($newToken);
+
+				if ($userId) {
+					$device->setUserId($userId);
+				}
+
+				$entityManager->persist($device);
+
+				//cria um novo nos serviços da UNISUAM com o novo token
+				UnisuamPushServices::create($device);
+			} else {
+				// se existir remove o antigo, pois já foi atualizado
+				$entityManager->remove($device);
+				UnisuamPushServices::delete($device);
+			}
+
+
 			$entityManager->flush();
 			return true;
 		}
@@ -223,6 +302,11 @@ class DeviceManager {
 		}
 
 		global $entityManager;
+
+		$deviceToDelete = DeviceManager::getDevice($token);
+
+		//remove dos serviços da UNISUAM
+		UnisuamPushServices::delete($deviceToDelete);
 
 		$queryBuilder = $entityManager->createQueryBuilder()
 							->delete(DeviceManager::DEVICE_REPOSITORY, "device")

@@ -2,6 +2,7 @@
 
 namespace PushNotification\Push\Android;
 
+use PushNotification\Model\Device;
 use PushNotification\Model\FailureDevice;
 use PushNotification\Model\GcmError;
 use PushNotification\Push\DeviceManager;
@@ -49,7 +50,10 @@ class AndroidPushController {
 				AndroidPushController::handleCanonicalResult($canonicalResults);
 
 				$notificationResult->addDevicesNotNotified($failureDevices);
+
 			} catch (\Exception $e) {
+				global $log;
+				$log->Error($e);
 				$notificationResult->setAndroidFailed(true);
 				$notificationResult->setAndroidFailureReason($e->getMessage());
 			}
@@ -96,14 +100,15 @@ class AndroidPushController {
 	 */
 	private static function handleCanonicalResult($results) {
 		$obj = new \ArrayObject($results);
+
 		$iterator = $obj->getIterator();
 
 		// itera sobre os resultados para atualizar os identificadores dos dispositivos
 		while ($iterator->valid()) {
 			$oldToken = $iterator->key();
-			$newToken = $iterator->current()->registrationId;
+			$newToken = $iterator->current();
 
-			DeviceManager::updateDevice($oldToken, $newToken);
+			DeviceManager::updateDevice($oldToken, $newToken, null);
 
 			$iterator->next();
 		}

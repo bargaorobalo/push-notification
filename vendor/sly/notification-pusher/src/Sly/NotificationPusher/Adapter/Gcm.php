@@ -44,7 +44,7 @@ class Gcm extends BaseAdapter
      */
     public function supports($token)
     {
-        return (bool) preg_match('/[0-9a-zA-Z\-\_]/i', $token);
+        return (bool) preg_match('/^[0-9a-zA-Z\-\_]+$/i', $token);
     }
 
     /**
@@ -88,9 +88,12 @@ class Gcm extends BaseAdapter
     {
         $client->setApiKey($this->getParameter('apiKey'));
 
-        if ($this->httpClient !== null) {
-            $client->setHttpClient($this->httpClient);
-        }
+        $newClient = new \Zend\Http\Client(null, array(
+            'adapter'       => 'Zend\Http\Client\Adapter\Socket',
+            'sslverifypeer' => false
+        ));
+
+        $client->setHttpClient($newClient);
 
         return $client;
     }
